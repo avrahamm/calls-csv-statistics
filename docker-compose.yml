@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # PHP service with Symfony
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    volumes:
+      - ./:/var/www/html
+      - vendor-volume:/var/www/html/vendor
+      - node-modules-volume:/var/www/html/node_modules
+    depends_on:
+      - database
+    environment:
+      DATABASE_URL: mysql://symfony:symfony@database:3306/symfony?serverVersion=8.0
+
+  # Web server (Nginx)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "18080:80"
+    volumes:
+      - ./:/var/www/html
+      - vendor-volume:/var/www/html/vendor
+      - node-modules-volume:/var/www/html/node_modules
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+
+  # MySQL database
+  database:
+    image: mysql:8.0
+    ports:
+      - "13306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: symfony
+      MYSQL_USER: symfony
+      MYSQL_PASSWORD: symfony
+    volumes:
+      - db-data:/var/lib/mysql
+
+  # Node service for React development
+  node:
+    image: node:latest
+    volumes:
+      - ./:/var/www/html
+      - vendor-volume:/var/www/html/vendor
+      - node-modules-volume:/var/www/html/node_modules
+    working_dir: /var/www/html
+    command: >
+      sh -c "echo 'Node.js container for React development is ready'"
+
+volumes:
+  db-data:
+  vendor-volume:
+  node-modules-volume:
