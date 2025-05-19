@@ -101,7 +101,7 @@ Additionally, the following files and directories are excluded from the Docker b
 - Testing files: `.phpunit.result.cache`, `phpunit.xml`, `tests/`
 - Temporary and system files: `*.log`, `*.cache`, `*.swp`, `*.swo`, `.DS_Store`
 
-This ensures that only necessary files are included in the Docker build context, resulting in faster builds and smaller images.
+This ensures that only the necessary files are included in the Docker build context, resulting in faster builds and smaller images.
 
 ### Symfony Development
 
@@ -116,7 +116,6 @@ docker-compose exec node bash -c "cd /var/www/html && yarn encore dev"
 ```
 
 For automatic rebuilding during development (recommended):
-
 ```bash
 docker-compose exec node bash -c "cd /var/www/html && yarn encore dev --watch"
 ```
