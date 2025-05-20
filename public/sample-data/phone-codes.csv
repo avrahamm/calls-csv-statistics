@@ -1,0 +1,246 @@
+Country,Continent,Phone
+Andorra,EU,376
+United Arab Emirates,AS,971
+Afghanistan,AS,93
+Antigua and Barbuda,NA,1268
+Anguilla,NA,1264
+Albania,EU,355
+Armenia,AS,374
+Angola,AF,244
+Argentina,SA,54
+American Samoa,OC,1684
+Austria,EU,43
+Australia,OC,61
+Aruba,NA,297
+Aland Islands,EU,35818
+Azerbaijan,AS,994
+Bosnia and Herzegovina,EU,387
+Barbados,NA,1246
+Bangladesh,AS,880
+Belgium,EU,32
+Burkina Faso,AF,226
+Bulgaria,EU,359
+Bahrain,AS,973
+Burundi,AF,257
+Benin,AF,229
+Saint Barthelemy,NA,590
+Bermuda,NA,1441
+Brunei,AS,673
+Bolivia,SA,591
+Puerto Rico,SA,55
+Bahamas,NA,1242
+Bhutan,AS,975
+Botswana,AF,267
+Belarus,EU,375
+Belize,NA,501
+Canada,NA,1
+Cocos Islands,AS,61
+Democratic Republic of the Congo,AF,243
+Central African Republic,AF,236
+Republic of the Congo,AF,242
+Switzerland,EU,41
+Ivory Coast,AF,225
+Cook Islands,OC,682
+Chile,SA,56
+Cameroon,AF,237
+China,AS,86
+Colombia,SA,57
+Costa Rica,NA,506
+Cuba,NA,53
+Cabo Verde,AF,238
+Curacao,NA,599
+Christmas Island,OC,61
+Cyprus,EU,357
+Czechia,EU,420
+Germany,EU,49
+Djibouti,AF,253
+Denmark,EU,45
+Dominica,NA,1767
+Dominican Republic,NA,1809
+Dominican Republic,NA,1829
+Algeria,AF,213
+Ecuador,SA,593
+Estonia,EU,372
+Egypt,AF,20
+Western Sahara,AF,212
+Eritrea,AF,291
+Spain,EU,34
+Ethiopia,AF,251
+Finland,EU,358
+Fiji,OC,679
+Falkland Islands,SA,500
+Micronesia,OC,691
+Faroe Islands,EU,298
+France,EU,33
+Gabon,AF,241
+United Kingdom,EU,44
+Grenada,NA,1473
+Georgia,AS,995
+French Guiana,SA,594
+Guernsey,EU,441481
+Ghana,AF,233
+Gibraltar,EU,350
+Greenland,NA,299
+Gambia,AF,220
+Guinea,AF,224
+Guadeloupe,NA,590
+Equatorial Guinea,AF,240
+Greece,EU,30
+Guatemala,NA,502
+Guam,OC,1671
+GuineaBissau,AF,245
+Guyana,SA,592
+Hong Kong,AS,852
+Honduras,NA,504
+Croatia,EU,385
+Haiti,NA,509
+Hungary,EU,36
+Indonesia,AS,62
+Ireland,EU,353
+Israel,AS,972
+Isle of Man,EU,441624
+India,AS,91
+British Indian Ocean Territory,AS,246
+Iraq,AS,964
+Iran,AS,98
+Iceland,EU,354
+Italy,EU,39
+Jersey,EU,441534
+Jamaica,NA,1876
+Jordan,AS,962
+Japan,AS,81
+Kenya,AF,254
+Kyrgyzstan,AS,996
+Cambodia,AS,855
+Kiribati,OC,686
+Comoros,AF,269
+Saint Kitts and Nevis,NA,1869
+North Korea,AS,850
+South Korea,AS,82
+Kuwait,AS,965
+Cayman Islands,NA,1345
+Kazakhstan,AS,7
+Laos,AS,856
+Lebanon,AS,961
+Saint Lucia,NA,1758
+Liechtenstein,EU,423
+Sri Lanka,AS,94
+Liberia,AF,231
+Lesotho,AF,266
+Lithuania,EU,370
+Luxembourg,EU,352
+Latvia,EU,371
+Libya,AF,218
+Morocco,AF,212
+Monaco,EU,377
+Moldova,EU,373
+Montenegro,EU,382
+Saint Martin,NA,590
+Madagascar,AF,261
+Marshall Islands,OC,692
+North Macedonia,EU,389
+Mali,AF,223
+Myanmar,AS,95
+Mongolia,AS,976
+Macao,AS,853
+Northern Mariana Islands,OC,1670
+Martinique,NA,596
+Mauritania,AF,222
+Montserrat,NA,1664
+Malta,EU,356
+Mauritius,AF,230
+Maldives,AS,960
+Malawi,AF,265
+Mexico,NA,52
+Malaysia,AS,60
+Mozambique,AF,258
+Namibia,AF,264
+New Caledonia,OC,687
+Niger,AF,227
+Norfolk Island,OC,672
+Nigeria,AF,234
+Nicaragua,NA,505
+The Netherlands,EU,31
+Norway,EU,47
+Nepal,AS,977
+Nauru,OC,674
+Niue,OC,683
+New Zealand,OC,64
+Oman,AS,968
+Panama,NA,507
+Peru,SA,51
+French Polynesia,OC,689
+Papua New Guinea,OC,675
+Philippines,AS,63
+Pakistan,AS,92
+Poland,EU,48
+Saint Pierre and Miquelon,NA,508
+Pitcairn,OC,870
+Puerto Rico,NA,1787
+Puerto Rico,NA,1939
+Palestinian Territory,AS,970
+Portugal,EU,351
+Palau,OC,680
+Paraguay,SA,595
+Qatar,AS,974
+Reunion,AF,262
+Romania,EU,40
+Serbia,EU,381
+Russia,EU,7
+Rwanda,AF,250
+Saudi Arabia,AS,966
+Solomon Islands,OC,677
+Seychelles,AF,248
+Sudan,AF,249
+South Sudan,AF,211
+Sweden,EU,46
+Singapore,AS,65
+Saint Helena,AF,290
+Slovenia,EU,386
+Svalbard and Jan Mayen,EU,47
+Slovakia,EU,421
+Sierra Leone,AF,232
+San Marino,EU,378
+Senegal,AF,221
+Somalia,AF,252
+Suriname,SA,597
+Sao Tome and Principe,AF,239
+El Salvador,NA,503
+Sint Maarten,NA,599
+Syria,AS,963
+Eswatini,AF,268
+Turks and Caicos Islands,NA,1649
+Chad,AF,235
+Togo,AF,228
+Thailand,AS,66
+Tajikistan,AS,992
+Tokelau,OC,690
+Timor Leste,OC,670
+Turkmenistan,AS,993
+Tunisia,AF,216
+Tonga,OC,676
+Turkey,AS,90
+Trinidad and Tobago,NA,1868
+Tuvalu,OC,688
+Taiwan,AS,886
+Tanzania,AF,255
+Ukraine,EU,380
+Uganda,AF,256
+Uruguay,SA,598
+Uzbekistan,AS,998
+Vatican,EU,379
+Saint Vincent and the Grenadines,NA,1784
+Venezuela,SA,58
+British Virgin Islands,NA,1284
+U.S. Virgin Islands,NA,1340
+Vietnam,AS,84
+Vanuatu,OC,678
+Wallis and Futuna,OC,681
+Samoa,OC,685
+Yemen,AS,967
+Mayotte,AF,262
+South Africa,AF,27
+Zambia,AF,260
+Zimbabwe,AF,263
+Serbia and Montenegro,EU,381
+Netherlands Antilles,NA,599
