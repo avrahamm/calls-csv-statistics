@@ -1,0 +1,24 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+// import App from './components/App';
+
+const App = () => {
+    return (
+        <div className="container mt-5">
+            <div className="row">
+                <div className="col-md-12">
+                    <div className="card">
+                        <div className="card-header">
+                            <h3>Symfony with React</h3>
+                        </div>
+                        <div className="card-body">
+                            <p>Your Symfony and React application is now set up!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+ReactDOM.render(<App />, document.getElementById('root'));

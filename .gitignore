@@ -1,6 +1,7 @@
 # IDE files
 .idea
 .idea/
+.idea/*
 .vscode/
 
 # Symfony cache and logs
