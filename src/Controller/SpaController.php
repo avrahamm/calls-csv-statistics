@@ -9,6 +9,8 @@ use Symfony\Component\Routing\Annotation\Route;
 class SpaController extends AbstractController
 {
     #[Route('/app/{reactRouting}', name: 'app', defaults: ['reactRouting' => null], requirements: ['reactRouting' => '.+'])]
+    #[Route('/statistics', name: 'statistics')]
+    #[Route('/upload_calls', name: 'upload_calls')]
     public function index(): Response
     {
         return $this->render('spa/index.html.twig');

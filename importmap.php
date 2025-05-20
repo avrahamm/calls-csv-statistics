@@ -31,4 +31,16 @@ return [
     'react-dom' => [
         'version' => '19.1.0',
     ],
+    'react-router-dom' => [
+        'version' => '6.20.0',
+    ],
+    './components/Home.js' => [
+        'path' => './assets/react/components/Home.js',
+    ],
+    './components/Statistics.js' => [
+        'path' => './assets/react/components/Statistics.js',
+    ],
+    './components/UploadCalls.js' => [
+        'path' => './assets/react/components/UploadCalls.js',
+    ],
 ];

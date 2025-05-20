@@ -40,4 +40,19 @@
     array (
     ),
   ),
+  'react-router-dom' => 
+  array (
+    'version' => '6.20.0',
+    'dependencies' => 
+    array (
+      0 => 'react',
+      1 => 'react-dom',
+      2 => 'react-router',
+      3 => 'react-router',
+      4 => '@remix-run/router',
+    ),
+    'extraFiles' => 
+    array (
+    ),
+  ),
 );

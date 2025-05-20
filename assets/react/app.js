@@ -1,23 +1,41 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-// import App from './components/App';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Home from './components/Home.js';
+import Statistics from './components/Statistics.js';
+import UploadCalls from './components/UploadCalls.js';
 
 const App = () => {
     return (
-        <div className="container mt-5">
-            <div className="row">
-                <div className="col-md-12">
-                    <div className="card">
-                        <div className="card-header">
-                            <h3>Symfony with React</h3>
-                        </div>
-                        <div className="card-body">
-                            <p>Your Symfony and React application is now set up!</p>
+        <Router>
+            <div className="container mt-4">
+                <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4">
+                    <div className="container-fluid">
+                        <span className="navbar-brand">Calls System</span>
+                        <div className="collapse navbar-collapse">
+                            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/app">Home</Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/statistics">Statistics</Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/upload_calls">Upload calls file</Link>
+                                </li>
+                            </ul>
                         </div>
                     </div>
-                </div>
+                </nav>
+
+                <Routes>
+                    <Route path="/app" element={<Home />} />
+                    <Route path="/statistics" element={<Statistics />} />
+                    <Route path="/upload_calls" element={<UploadCalls />} />
+                    <Route path="*" element={<Home />} />
+                </Routes>
             </div>
-        </div>
+        </Router>
     );
 };
 
