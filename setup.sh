@@ -108,7 +108,7 @@ EOL
 
     # Update webpack.config.js to include React
     sed -i "/Encore.setOutputPath/a Encore.enableReactPreset()" webpack.config.js
-    sed -i "/Encore.addEntry/a Encore.addEntry('react_app', './assets/react/app.js')" webpack.config.js
+    # React app entry is now handled directly in webpack.config.js
 fi
 
 # Create a controller for the SPA if it doesn't exist
@@ -145,7 +145,7 @@ EOL
 
 {% block stylesheets %}
     {{ parent() }}
-    {{ encore_entry_link_tags('react_app') }}
+    {{ encore_entry_link_tags('app') }}
 {% endblock %}
 
 {% block body %}
@@ -154,7 +154,7 @@ EOL
 
 {% block javascripts %}
     {{ parent() }}
-    {{ encore_entry_script_tags('react_app') }}
+    {{ encore_entry_script_tags('app') }}
 {% endblock %}
 EOL
 fi
