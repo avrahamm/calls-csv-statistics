@@ -51,6 +51,10 @@ RUN npm install -g yarn
 # Configure PHP
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
 
+# Comment out user and group directives in www.conf to avoid warnings when running as non-root
+RUN sed -i 's/^user = www-data/;user = www-data/' /usr/local/etc/php-fpm.d/www.conf && \
+    sed -i 's/^group = www-data/;group = www-data/' /usr/local/etc/php-fpm.d/www.conf
+
 # Switch to appuser for subsequent operations
 USER appuser
 

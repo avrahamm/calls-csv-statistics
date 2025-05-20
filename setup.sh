@@ -163,7 +163,7 @@ echo "Building assets..."
 # Ensure Stimulus packages are installed
 yarn add @hotwired/stimulus @symfony/stimulus-bridge
 yarn add webpack-dev-server --dev
-yarn install && yarn build
+yarn install && yarn dev
 
 echo "Setup complete! Your Symfony application with React is ready."
 echo "Access your application at: http://localhost:18080"
