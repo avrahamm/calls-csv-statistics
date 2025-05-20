@@ -8,6 +8,12 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class SpaController extends AbstractController
 {
+    #[Route('/', name: 'homepage')]
+    public function homepage(): Response
+    {
+        return $this->redirectToRoute('app');
+    }
+
     #[Route('/app/{reactRouting}', name: 'app', defaults: ['reactRouting' => null], requirements: ['reactRouting' => '.+'])]
     #[Route('/statistics', name: 'statistics')]
     #[Route('/upload_calls', name: 'upload_calls')]

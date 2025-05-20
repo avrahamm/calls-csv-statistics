@@ -26,10 +26,13 @@ return [
         'version' => '7.3.0',
     ],
     'react' => [
-        'version' => '19.1.0',
+        'version' => '18.2.0',
     ],
     'react-dom' => [
-        'version' => '19.1.0',
+        'version' => '18.2.0',
+    ],
+    'react-dom/client' => [
+        'version' => '18.2.0',
     ],
     'react-router-dom' => [
         'version' => '6.20.0',
