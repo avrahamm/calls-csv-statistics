@@ -27,8 +27,20 @@ cd <repository-directory>
 
 ### 2. Start the Docker Containers
 
+For first-time setup or after modifying the Dockerfile:
 ```bash
-docker-compose up -d
+docker compose build
+docker compose up -d
+```
+
+Or, for a single command that builds (if needed) and starts the containers:
+```bash
+docker compose up -d --build
+```
+
+For subsequent starts when no Dockerfile changes have been made:
+```bash
+docker compose up -d
 ```
 
 This will start all the necessary services:
@@ -77,7 +89,7 @@ This Docker setup uses volume mappings to ensure that any changes you make to th
 - Changes are instantly available in the containers without requiring rebuilds or restarts
 - This applies to all source code files (PHP, JavaScript, CSS, Twig templates, etc.)
 
-The volume mappings are defined in the `docker-compose.yml` file, where the project root directory is mounted to `/var/www/html` in each container.
+The volume mappings are defined in the `docker-compose.yml` file (or `compose.yaml` in newer versions), where the project root directory is mounted to `/app` in each container.
 
 #### Excluded Directories
 
@@ -96,7 +108,7 @@ Additionally, the following files and directories are excluded from the Docker b
 - Symfony cache, logs, and sessions: `var/cache/`, `var/log/`, `var/sessions/`
 - Webpack build output: `public/build/`
 - Development tools: `.git/`, `.github/`, `.idea/`, `.vscode/`
-- Docker configuration: `docker/`, `docker-compose*.yml`
+- Docker configuration: `docker/`, `docker-compose*.yml`, `compose*.yaml`
 - Environment and configuration files: `.env.local`, `.env.*.local`
 - Testing files: `.phpunit.result.cache`, `phpunit.xml`, `tests/`
 - Temporary and system files: `*.log`, `*.cache`, `*.swp`, `*.swo`, `.DS_Store`
@@ -112,12 +124,12 @@ The Symfony application code is located in the project root. Any changes to the 
 The React application is located in the `assets/react` directory. While the source files are immediately synced to the container, you need to rebuild the assets for the changes to take effect in the browser:
 
 ```bash
-docker-compose exec node bash -c "cd /var/www/html && yarn encore dev"
+docker compose exec node bash -c "cd /app && yarn encore dev"
 ```
 
 For automatic rebuilding during development (recommended):
 ```bash
-docker-compose exec node bash -c "cd /var/www/html && yarn encore dev --watch"
+docker compose exec node bash -c "cd /app && yarn encore dev --watch"
 ```
 
 This will watch for changes in your React files and automatically rebuild the assets whenever a file is modified.
@@ -186,7 +198,7 @@ Nginx configuration can be modified in `docker/nginx/default.conf`.
 
 ### Docker Configuration
 
-Docker services can be customized in the `docker-compose.yml` file.
+Docker services can be customized in the `docker-compose.yml` file (or `compose.yaml` in newer versions).
 
 ## Troubleshooting
 
@@ -201,9 +213,9 @@ sudo chown -R $USER:$USER .
 ### Database Connection Issues
 
 If the application cannot connect to the database, ensure that:
-1. The database container is running: `docker-compose ps`
-2. The DATABASE_URL in the .env file matches the configuration in docker-compose.yml
-3. The database has been created: `docker-compose exec database mysql -u symfony -psymfony -e "SHOW DATABASES;"`
+1. The database container is running: `docker compose ps`
+2. The DATABASE_URL in the .env file matches the configuration in docker-compose.yml (or compose.yaml)
+3. The database has been created: `docker compose exec database mysql -u symfony -psymfony -e "SHOW DATABASES;"`
 
 ## License
 

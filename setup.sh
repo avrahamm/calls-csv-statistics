@@ -6,22 +6,70 @@ echo "Setting up Symfony and React application..."
 # Create Symfony project if it doesn't exist
 if [ ! -f "composer.json" ]; then
     echo "Creating new Symfony project..."
-    docker-compose exec php composer create-project symfony/website-skeleton .
-    docker-compose exec php composer require symfony/webpack-encore-bundle
+    # Check if directory is empty (excluding hidden files)
+    if [ -z "$(ls -A | grep -v '^\.')" ]; then
+        echo "Directory is empty, creating Symfony project using Symfony CLI..."
+        # Use Symfony CLI to create a new project (without Git initialization)
+        symfony new . --webapp --version=lts --no-git
+        # Install webpack encore bundle
+        composer require symfony/webpack-encore-bundle
+        # Install stimulus bundle
+        # composer require symfony/stimulus-bundle --no-interaction
+        # Fix the PHPStan PhpDocParser dependency issue by updating symfony/property-info
+        composer require --with-all-dependencies "symfony/property-info:^7.0.8"
+        composer clear-cache
+        composer install --optimize-autoloader
+        bin/console cache:clear
+    else
+        echo "Directory is not empty, creating Symfony project using Symfony CLI..."
+        # Create a temporary directory
+        mkdir -p /tmp/symfony-project
+        cd /tmp/symfony-project
+
+        # Use Symfony CLI to create a new project in the temporary directory (without Git initialization)
+        symfony new . --webapp --version=lts --no-git
+        # Install webpack encore bundle
+        composer require symfony/webpack-encore-bundle
+        # Install stimulus bundle
+        # composer require symfony/stimulus-bundle --no-interaction
+        # Fix the PHPStan PhpDocParser dependency issue by updating symfony/property-info
+        composer require --with-all-dependencies "symfony/property-info:^7.0.8"
+        composer clear-cache
+        composer install --optimize-autoloader
+        bin/console cache:clear
+
+        # Copy the files to the current directory
+        cp -r * /app/
+        cp -r .env /app/
+        cp -r .env.local /app/ 2>/dev/null || true
+        cp -r .env.test /app/ 2>/dev/null || true
+
+        # Go back to the original directory
+        cd /app
+    fi
 else
     echo "Symfony project already exists, updating dependencies..."
-    docker-compose exec php composer install
+    composer install
+    # Install stimulus bundle if not already installed
+    # composer require symfony/stimulus-bundle --no-interaction
+    # Fix the PHPStan PhpDocParser dependency issue by updating symfony/property-info
+    composer require --with-all-dependencies "symfony/property-info:^7.0.8"
+    composer clear-cache
+    composer install --optimize-autoloader
+    bin/console cache:clear
+
 fi
 
 # Set up React in the assets directory
 if [ ! -d "assets/react" ]; then
     echo "Setting up React application..."
-    docker-compose exec php mkdir -p assets/react
-    docker-compose exec node bash -c "cd /var/www/html && yarn add @babel/preset-react --dev"
-    docker-compose exec node bash -c "cd /var/www/html && yarn add react react-dom prop-types axios"
+    mkdir -p assets/react
+    yarn add @babel/preset-react --dev
+    yarn add react react-dom prop-types axios
+    yarn add @hotwired/stimulus @symfony/stimulus-bridge
 
     # Create basic React app structure
-    docker-compose exec php mkdir -p assets/react/components
+    mkdir -p assets/react/components
 
     # Create main React entry point
     cat > assets/react/app.js << 'EOL'
@@ -59,8 +107,8 @@ export default App;
 EOL
 
     # Update webpack.config.js to include React
-    docker-compose exec php sed -i "/Encore.setOutputPath/a Encore.enableReactPreset()" webpack.config.js
-    docker-compose exec php sed -i "/Encore.addEntry/a Encore.addEntry('react_app', './assets/react/app.js')" webpack.config.js
+    sed -i "/Encore.setOutputPath/a Encore.enableReactPreset()" webpack.config.js
+    sed -i "/Encore.addEntry/a Encore.addEntry('react_app', './assets/react/app.js')" webpack.config.js
 fi
 
 # Create a controller for the SPA if it doesn't exist
@@ -112,8 +160,12 @@ EOL
 fi
 
 echo "Building assets..."
-docker-compose exec node bash -c "cd /var/www/html && yarn install && yarn encore dev"
+# Ensure Stimulus packages are installed
+yarn add @hotwired/stimulus @symfony/stimulus-bridge
+yarn add webpack-dev-server --dev
+yarn install && yarn watch
 
 echo "Setup complete! Your Symfony application with React is ready."
 echo "Access your application at: http://localhost:18080"
 echo "Access your React SPA at: http://localhost:18080/app"
+#sleep 10000

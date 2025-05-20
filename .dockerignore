@@ -8,7 +8,6 @@ public/build/
 .github/
 .idea/
 .vscode/
-docker/
 docker-compose*.yml
 .env.local
 .env.*.local
