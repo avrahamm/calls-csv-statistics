@@ -171,9 +171,8 @@ class CallsCsvProcessor
         $call->setDialedNumber($row[3]);
         $call->setSourceIp($row[4]);
 
-        // Determine the destination continent based on the dialed number
-        $destContinent = $this->continentPhonePrefixRepository->findContinentCodeByPhoneNumber($row[3]);
-        $call->setDestContinent($destContinent);
+        // We'll set dest_continent in bulk later for better performance
+        // For now, leave it as null
 
         // TODO: Determine the source continent based on IP address (not part of this task)
         // For now, we'll leave source_continent as null
@@ -191,8 +190,50 @@ class CallsCsvProcessor
      */
     private function processBatch(array $batch): void
     {
+        // First, persist all calls
         foreach ($batch as $call) {
             $this->entityManager->persist($call);
+        }
+        $this->entityManager->flush();
+
+        // Collect all unique dialed numbers from the batch
+        $dialedNumbers = array_unique(array_map(function (Call $call) {
+            return $call->getDialedNumber();
+        }, $batch));
+
+        if (!empty($dialedNumbers)) {
+            // Get continent codes for all dialed numbers in bulk
+            $phoneToContinent = $this->continentPhonePrefixRepository->findContinentCodesByPhoneNumbersBulk($dialedNumbers);
+
+            // Filter out null continent codes
+            $phoneToContinent = array_filter($phoneToContinent, function ($continent) {
+                return $continent !== null;
+            });
+
+            if (!empty($phoneToContinent)) {
+                // Update dest_continent for all calls in bulk
+                $this->callRepository->updateDestContinentInBulk($phoneToContinent);
+
+                // Update within_same_cont for calls in the current batch
+                $this->updateWithinSameContForBatch($batch, $phoneToContinent);
+            }
+        }
+    }
+
+    /**
+     * Update within_same_cont for a batch of calls
+     */
+    private function updateWithinSameContForBatch(array $batch, array $phoneToContinent): void
+    {
+        foreach ($batch as $call) {
+            $dialedNumber = $call->getDialedNumber();
+            $destContinent = $phoneToContinent[$dialedNumber] ?? null;
+
+            // If we have both source and destination continents, update within_same_cont
+            if ($destContinent !== null && $call->getSourceContinent() !== null) {
+                $call->setWithinSameCont($call->getSourceContinent() === $destContinent);
+                $this->entityManager->persist($call);
+            }
         }
 
         $this->entityManager->flush();
