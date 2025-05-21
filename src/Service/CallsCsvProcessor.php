@@ -53,7 +53,13 @@ class CallsCsvProcessor
         $uploadedFile->setUploadedAt(new \DateTime());
         $uploadedFile->setStatus('processing');
 
-        $this->uploadedFileRepository->save($uploadedFile, true);
+        // Save the UploadedFile entity
+        try {
+            $this->uploadedFileRepository->save($uploadedFile, true);
+        } catch (\Exception $e) {
+            // If we can't save the entity, we can't process the file
+            return false;
+        }
 
         $result = $this->processFileByPath($filePath, $uploadedFile);
 
@@ -65,9 +71,14 @@ class CallsCsvProcessor
      */
     private function processFile(UploadedFile $uploadedFile): bool
     {
-        // Update status to processing
-        $uploadedFile->setStatus('processing');
-        $this->uploadedFileRepository->save($uploadedFile, true);
+        // Update the status to processing
+        try {
+            $uploadedFile->setStatus('processing');
+            $this->uploadedFileRepository->save($uploadedFile, true);
+        } catch (\Exception $e) {
+            // If we can't update the status, we can't process the file
+            return false;
+        }
 
         $uploadPath = $this->parameterBag->get('kernel.project_dir') . '/' . $this->parameterBag->get('upload_path');
         $filePath = $uploadPath . '/' . $uploadedFile->getFileName();
@@ -94,6 +105,9 @@ class CallsCsvProcessor
             $batch = [];
             $rowCount = 0;
 
+            // Begin transaction for Call table operations
+            $this->entityManager->beginTransaction();
+
             while (($row = fgetcsv($handle)) !== false) {
                 $call = $this->createCallFromCsvRow($row);
                 $batch[] = $call;
@@ -111,19 +125,31 @@ class CallsCsvProcessor
                 $this->processBatch($batch);
             }
 
+            // Commit transaction for Call table operations
+            $this->entityManager->commit();
+
             fclose($handle);
 
-            // Update status to completed
+            // Update status to completed (no transaction needed)
             $uploadedFile->setStatus('completed');
             $uploadedFile->setProcessedAt(new \DateTime());
             $this->uploadedFileRepository->save($uploadedFile, true);
 
             return true;
         } catch (\Exception $e) {
-            // Update status to "failed"
-            $uploadedFile->setStatus('failed');
-            $uploadedFile->setErrorMessage($e->getMessage());
-            $this->uploadedFileRepository->save($uploadedFile, true);
+            // Rollback transaction if an error occurred and it's active
+            if ($this->entityManager->getConnection()->isTransactionActive()) {
+                $this->entityManager->rollback();
+            }
+
+            // Update the status to "failed" (no transaction needed)
+            try {
+                $uploadedFile->setStatus('failed');
+                $uploadedFile->setErrorMessage($e->getMessage());
+                $this->uploadedFileRepository->save($uploadedFile, true);
+            } catch (\Exception $statusUpdateException) {
+                // We could log this error, but for now we'll just continue
+            }
 
             return false;
         }
