@@ -113,7 +113,7 @@ class CallsCsvProcessor
             $this->entityManager->beginTransaction();
 
             while (($row = fgetcsv($handle)) !== false) {
-                $call = $this->createCallFromCsvRow($row);
+                $call = $this->createCallFromCsvRow($row, $uploadedFile->getId());
                 $batch[] = $call;
                 $rowCount++;
 
@@ -162,7 +162,7 @@ class CallsCsvProcessor
     /**
      * Create a Call entity from a CSV row
      */
-    private function createCallFromCsvRow(array $row): Call
+    private function createCallFromCsvRow(array $row, ?int $uploadedFileId = null): Call
     {
         $call = new Call();
         $call->setCustomerId((int)$row[0]);
@@ -170,6 +170,7 @@ class CallsCsvProcessor
         $call->setDuration((int)$row[2]);
         $call->setDialedNumber($row[3]);
         $call->setSourceIp($row[4]);
+        $call->setUploadedFileId($uploadedFileId);
 
         // We'll set dest_continent in bulk later for better performance
         // For now, leave it as null

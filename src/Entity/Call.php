@@ -42,6 +42,9 @@ class Call
     #[ORM\Column(nullable: true)]
     private ?bool $within_same_cont = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $uploaded_file_id = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -139,6 +142,18 @@ class Call
     public function setWithinSameCont(?bool $within_same_cont): self
     {
         $this->within_same_cont = $within_same_cont;
+
+        return $this;
+    }
+
+    public function getUploadedFileId(): ?int
+    {
+        return $this->uploaded_file_id;
+    }
+
+    public function setUploadedFileId(?int $uploaded_file_id): self
+    {
+        $this->uploaded_file_id = $uploaded_file_id;
 
         return $this;
     }
