@@ -89,4 +89,89 @@ class ContinentPhonePrefixRepository extends ServiceEntityRepository
 
         return $result;
     }
+
+    /**
+     * Find continent codes for multiple phone numbers using a bulk query
+     * 
+     * Uses a temporary table approach to efficiently process multiple phone numbers at once.
+     * This is more efficient than processing each phone number individually.
+     * 
+     * @param array $phoneNumbers Array of phone numbers to check
+     * @return array Associative array of phone numbers and their continent codes
+     */
+    public function findContinentCodesByPhoneNumbersBulk(array $phoneNumbers): array
+    {
+        if (empty($phoneNumbers)) {
+            return [];
+        }
+
+        $connection = $this->getEntityManager()->getConnection();
+        $result = [];
+
+        try {
+            // Create a temporary table
+            $connection->executeStatement('
+                CREATE TEMPORARY TABLE tmp_phones (
+                    phone_prefix VARCHAR(16) PRIMARY KEY
+                )
+            ');
+
+            // Insert phone numbers into a temporary table
+            $insertSql = 'INSERT INTO tmp_phones VALUES ';
+            $insertValues = [];
+            $params = [];
+            $types = [];
+
+            foreach ($phoneNumbers as $index => $phoneNumber) {
+                $paramName = 'phone_' . $index;
+                $insertValues[] = '(:' . $paramName . ')';
+                $params[$paramName] = $phoneNumber;
+                $types[$paramName] = \PDO::PARAM_STR;
+
+                // Initialize a result with null values
+                $result[$phoneNumber] = null;
+            }
+
+            $insertSql .= implode(', ', $insertValues);
+            $connection->executeStatement($insertSql, $params, $types);
+
+            // For each prefix length (6 down to 1), find matching prefixes
+            for ($length = 6; $length >= 1; $length--) {
+                // Find matches for the current prefix length
+                $sql = '
+                    SELECT t.phone_prefix, c.continent_code
+                    FROM tmp_phones AS t
+                    JOIN continent_phone_prefix AS c
+                    ON LEFT(t.phone_prefix, :length) = c.phone_prefix
+                    WHERE LENGTH(c.phone_prefix) = :length
+                ';
+
+                $stmt = $connection->executeQuery($sql, ['length' => $length]);
+
+                // Process results
+                while ($row = $stmt->fetchAssociative()) {
+                    $phoneNumber = $row['phone_prefix'];
+                    // Only set the result if it hasn't been set by a longer prefix
+                    if ($result[$phoneNumber] === null) {
+                        $result[$phoneNumber] = $row['continent_code'];
+                    }
+                }
+            }
+
+            // Drop a temporary table
+            $connection->executeStatement('DROP TEMPORARY TABLE IF EXISTS tmp_phones');
+        } catch (\Exception $e) {
+            // Ensure a temporary table is dropped even if an error occurs
+            try {
+                $connection->executeStatement('DROP TEMPORARY TABLE IF EXISTS tmp_phones');
+            } catch (\Exception $dropException) {
+                // Ignore errors when dropping the table
+            }
+
+            // Fallback to non-bulk method
+            return $this->findContinentCodesByPhoneNumbers($phoneNumbers);
+        }
+
+        return $result;
+    }
 }
