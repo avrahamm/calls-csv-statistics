@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Call;
 use App\Entity\UploadedFile;
 use App\Repository\CallRepository;
+use App\Repository\ContinentPhonePrefixRepository;
 use App\Repository\UploadedFileRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -15,17 +16,20 @@ class CallsCsvProcessor
     private UploadedFileRepository $uploadedFileRepository;
     private EntityManagerInterface $entityManager;
     private ParameterBagInterface $parameterBag;
+    private ContinentPhonePrefixRepository $continentPhonePrefixRepository;
 
     public function __construct(
         CallRepository $callRepository,
         UploadedFileRepository $uploadedFileRepository,
         EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag
+        ParameterBagInterface $parameterBag,
+        ContinentPhonePrefixRepository $continentPhonePrefixRepository
     ) {
         $this->callRepository = $callRepository;
         $this->uploadedFileRepository = $uploadedFileRepository;
         $this->entityManager = $entityManager;
         $this->parameterBag = $parameterBag;
+        $this->continentPhonePrefixRepository = $continentPhonePrefixRepository;
     }
 
     /**
@@ -166,6 +170,18 @@ class CallsCsvProcessor
         $call->setDuration((int)$row[2]);
         $call->setDialedNumber($row[3]);
         $call->setSourceIp($row[4]);
+
+        // Determine the destination continent based on the dialed number
+        $destContinent = $this->continentPhonePrefixRepository->findContinentCodeByPhoneNumber($row[3]);
+        $call->setDestContinent($destContinent);
+
+        // TODO: Determine the source continent based on IP address (not part of this task)
+        // For now, we'll leave source_continent as null
+
+        // Set within_same_cont if both source and destination continents are known
+        if ($call->getSourceContinent() !== null && $call->getDestContinent() !== null) {
+            $call->setWithinSameCont($call->getSourceContinent() === $call->getDestContinent());
+        }
 
         return $call;
     }
