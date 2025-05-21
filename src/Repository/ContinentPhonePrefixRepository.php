@@ -109,10 +109,10 @@ class ContinentPhonePrefixRepository extends ServiceEntityRepository
         $result = [];
 
         try {
-            // Create a temporary table
+            // Create a temporary table with explicit collation to match the continent_phone_prefix table
             $connection->executeStatement('
                 CREATE TEMPORARY TABLE tmp_phones (
-                    phone_prefix VARCHAR(16) PRIMARY KEY
+                    phone_prefix VARCHAR(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci PRIMARY KEY
                 )
             ');
 

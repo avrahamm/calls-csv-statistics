@@ -57,10 +57,10 @@ class CallRepository extends ServiceEntityRepository
         $connection = $this->getEntityManager()->getConnection();
 
         try {
-            // Create a temporary table
+            // Create a temporary table with explicit collation to match the "calls" table
             $connection->executeStatement('
                 CREATE TEMPORARY TABLE tmp_phone_continent (
-                    phone VARCHAR(32) PRIMARY KEY,
+                    phone VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci PRIMARY KEY,
                     continent VARCHAR(2)
                 )
             ');
