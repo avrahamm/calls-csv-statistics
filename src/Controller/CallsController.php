@@ -3,11 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\UploadedFile;
+use App\Message\ProcessUploadedFileMessage;
 use App\Repository\UploadedFileRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -15,6 +17,12 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class CallsController extends AbstractController
 {
+    private MessageBusInterface $messageBus;
+
+    public function __construct(MessageBusInterface $messageBus)
+    {
+        $this->messageBus = $messageBus;
+    }
     /**
      * Handles file upload for calls data
      * 
@@ -81,9 +89,12 @@ class CallsController extends AbstractController
             // Save the entity to the database
             $uploadedFileRepository->save($uploadedFile, true);
 
+            // Dispatch a message to process the file
+            $this->messageBus->dispatch(new ProcessUploadedFileMessage($uploadedFile->getId()));
+
             return new JsonResponse([
                 'success' => true, 
-                'message' => 'File uploaded successfully',
+                'message' => 'File uploaded successfully and queued for processing',
                 'filename' => $newFilename
             ]);
         } catch (\Exception $e) {
