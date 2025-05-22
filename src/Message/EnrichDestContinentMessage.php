@@ -5,12 +5,16 @@ namespace App\Message;
 class EnrichDestContinentMessage
 {
     private int $uploadedFileId;
-    private array $uniquePhones;
+    private int $start;
+    private int $end;
+    private int $offset;
 
-    public function __construct(int $uploadedFileId, array $uniquePhones)
+    public function __construct(int $uploadedFileId, int $start, int $end, int $offset = 10)
     {
         $this->uploadedFileId = $uploadedFileId;
-        $this->uniquePhones = $uniquePhones;
+        $this->start = $start;
+        $this->end = $end;
+        $this->offset = $offset;
     }
 
     public function getUploadedFileId(): int
@@ -18,8 +22,18 @@ class EnrichDestContinentMessage
         return $this->uploadedFileId;
     }
 
-    public function getUniquePhones(): array
+    public function getStart(): int
     {
-        return $this->uniquePhones;
+        return $this->start;
+    }
+
+    public function getEnd(): int
+    {
+        return $this->end;
+    }
+
+    public function getOffset(): int
+    {
+        return $this->offset;
     }
 }

@@ -40,6 +40,64 @@ class CallRepository extends ServiceEntityRepository
     }
 
     /**
+     * Fetch unique dialed_numbers (phones) from the calls table based on uploadedFileId and start/end indexes
+     * 
+     * @param int $uploadedFileId The ID of the uploaded file
+     * @param int $start The start index
+     * @param int $limit The number of records to fetch
+     * @return array Array of unique dialed_numbers
+     */
+    public function findUniquePhonesByUploadedFileId(int $uploadedFileId, int $start, int $limit): array
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $sql = '
+            SELECT DISTINCT dialed_number
+            FROM calls
+            WHERE uploaded_file_id = :uploadedFileId
+            AND dest_continent IS NULL
+            LIMIT :start, :limit
+        ';
+
+        $stmt = $connection->prepare($sql);
+        $stmt->bindValue('uploadedFileId', $uploadedFileId, \PDO::PARAM_INT);
+        $stmt->bindValue('start', $start, \PDO::PARAM_INT);
+        $stmt->bindValue('limit', $limit, \PDO::PARAM_INT);
+        $result = $stmt->executeQuery();
+
+        $phones = [];
+        while ($row = $result->fetchAssociative()) {
+            $phones[] = $row['dialed_number'];
+        }
+
+        return $phones;
+    }
+
+    /**
+     * Count total unique dialed_numbers (phones) from the calls table based on uploadedFileId
+     * 
+     * @param int $uploadedFileId The ID of the uploaded file
+     * @return int Total number of unique dialed_numbers
+     */
+    public function countUniquePhonesByUploadedFileId(int $uploadedFileId): int
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $sql = '
+            SELECT COUNT(DISTINCT dialed_number) as count
+            FROM calls
+            WHERE uploaded_file_id = :uploadedFileId
+            AND dest_continent IS NULL
+        ';
+
+        $stmt = $connection->prepare($sql);
+        $stmt->bindValue('uploadedFileId', $uploadedFileId, \PDO::PARAM_INT);
+        $result = $stmt->executeQuery();
+
+        return (int) $result->fetchOne();
+    }
+
+    /**
      * Update dest_continent for calls with matching dialed_number in bulk
      * 
      * This method takes a dictionary of phone numbers mapped to continent codes

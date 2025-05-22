@@ -113,7 +113,6 @@ class CallsCsvProcessor
             // Process rows in batches of 10
             $batch = [];
             $rowCount = 0;
-            $uniqueDialedNumbers = [];
 
             // Begin transaction for Call table operations
             $this->entityManager->beginTransaction();
@@ -122,12 +121,6 @@ class CallsCsvProcessor
                 $call = $this->createCallFromCsvRow($row, $uploadedFile->getId());
                 $batch[] = $call;
                 $rowCount++;
-
-                // Collect unique dialed numbers
-                $dialedNumber = $call->getDialedNumber();
-                if (!in_array($dialedNumber, $uniqueDialedNumbers)) {
-                    $uniqueDialedNumbers[] = $dialedNumber;
-                }
 
                 // Process the batch when it reaches size 10
                 if (count($batch) >= 10) {
@@ -152,10 +145,10 @@ class CallsCsvProcessor
             $this->uploadedFileRepository->save($uploadedFile, true);
 
             // Dispatch a message to enrich dest_continent for calls with empty dest_continent
-            if (!empty($uniqueDialedNumbers)) {
-                $message = new EnrichDestContinentMessage($uploadedFile->getId(), $uniqueDialedNumbers);
-                $this->messageBus->dispatch($message);
-            }
+            // Use the new approach with start and end indexes
+            $offset = $this->parameterBag->get('enrich_dest_continent_offset');
+            $message = new EnrichDestContinentMessage($uploadedFile->getId(), 0, $offset, $offset);
+            $this->messageBus->dispatch($message);
 
             return true;
         } catch (\Exception $e) {
