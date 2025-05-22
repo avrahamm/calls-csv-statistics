@@ -67,26 +67,31 @@ class UploadedFileRepository extends ServiceEntityRepository
 
     /**
      * Update phones_enriched timestamp with pessimistic locking to avoid race conditions
+     * Uses direct SQL query to bypass entity manager caching
      */
     public function updatePhonesEnriched(int $fileId): bool
     {
         try {
             $em = $this->getEntityManager();
 
-            // Get the entity with a lock
-            $file = $this->find($fileId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE);
+            // Clear entity manager to avoid caching issues
+            $em->clear();
 
-            if (!$file) {
-                return false;
-            }
+            // Use direct SQL query to update the database
+            $connection = $em->getConnection();
+            $now = new \DateTime();
+            $formattedDate = $now->format('Y-m-d H:i:s');
 
-            // Update the field
-            $file->setPhonesEnriched(new \DateTime());
+            $sql = 'UPDATE uploaded_files SET phones_enriched = :timestamp WHERE id = :id';
+            $stmt = $connection->prepare($sql);
+            $stmt->bindValue('timestamp', $formattedDate);
+            $stmt->bindValue('id', $fileId, \PDO::PARAM_INT);
+            $result = $stmt->executeStatement();
 
-            // Save the changes
-            $em->flush();
+            // Clear entity manager again to ensure changes are visible
+            $em->clear();
 
-            return true;
+            return $result > 0;
         } catch (\Exception $e) {
             return false;
         }
@@ -94,26 +99,31 @@ class UploadedFileRepository extends ServiceEntityRepository
 
     /**
      * Update ips_enriched timestamp with pessimistic locking to avoid race conditions
+     * Uses direct SQL query to bypass entity manager caching
      */
     public function updateIpsEnriched(int $fileId): bool
     {
         try {
             $em = $this->getEntityManager();
 
-            // Get the entity with a lock
-            $file = $this->find($fileId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE);
+            // Clear entity manager to avoid caching issues
+            $em->clear();
 
-            if (!$file) {
-                return false;
-            }
+            // Use direct SQL query to update the database
+            $connection = $em->getConnection();
+            $now = new \DateTime();
+            $formattedDate = $now->format('Y-m-d H:i:s');
 
-            // Update the field
-            $file->setIpsEnriched(new \DateTime());
+            $sql = 'UPDATE uploaded_files SET ips_enriched = :timestamp WHERE id = :id';
+            $stmt = $connection->prepare($sql);
+            $stmt->bindValue('timestamp', $formattedDate);
+            $stmt->bindValue('id', $fileId, \PDO::PARAM_INT);
+            $result = $stmt->executeStatement();
 
-            // Save the changes
-            $em->flush();
+            // Clear entity manager again to ensure changes are visible
+            $em->clear();
 
-            return true;
+            return $result > 0;
         } catch (\Exception $e) {
             return false;
         }
