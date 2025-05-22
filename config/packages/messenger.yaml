@@ -27,5 +27,7 @@ framework:
 
             # Route your messages to the transports
             App\Message\ProcessUploadedFileMessage: async
+            App\Message\ProcessUploadedFileChunkMessage: async
+            App\Message\FinalizeCallsImportMessage: async
             App\Message\EnrichDestContinentMessage: async
             App\Message\EnrichSourceContinentMessage: async

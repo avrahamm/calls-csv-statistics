@@ -5,6 +5,7 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     upload_path: '%env(UPLOAD_PATH)%'
+    chunks_path: '%env(CHUNKS_PATH)%'
     enrich_dest_continent_offset: '%env(int:ENRICH_DEST_CONTINENT_OFFSET)%'
     enrich_source_continent_offset: '%env(int:ENRICH_SOURCE_CONTINENT_OFFSET)%'
     ip_geolocation_api_key: '%env(IP_GEOLOCATION_API_KEY)%'

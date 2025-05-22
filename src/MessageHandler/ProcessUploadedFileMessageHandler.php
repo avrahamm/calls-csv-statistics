@@ -3,18 +3,18 @@
 namespace App\MessageHandler;
 
 use App\Message\ProcessUploadedFileMessage;
-use App\Service\CallsCsvProcessor;
+use App\Service\ParallelCallsCsvProcessor;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Psr\Log\LoggerInterface;
 
 #[AsMessageHandler]
 class ProcessUploadedFileMessageHandler
 {
-    private CallsCsvProcessor $callsCsvProcessor;
+    private ParallelCallsCsvProcessor $callsCsvProcessor;
     private LoggerInterface $logger;
 
     public function __construct(
-        CallsCsvProcessor $callsCsvProcessor,
+        ParallelCallsCsvProcessor $callsCsvProcessor,
         LoggerInterface $logger
     ) {
         $this->callsCsvProcessor = $callsCsvProcessor;
@@ -24,12 +24,12 @@ class ProcessUploadedFileMessageHandler
     public function __invoke(ProcessUploadedFileMessage $message)
     {
         $fileId = $message->getFileId();
-        
+
         $this->logger->info('Processing uploaded file', ['file_id' => $fileId]);
-        
+
         try {
             $result = $this->callsCsvProcessor->processUploadedFile($fileId);
-            
+
             if ($result) {
                 $this->logger->info('Successfully processed uploaded file', ['file_id' => $fileId]);
             } else {
