@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Call;
 use App\Entity\UploadedFile;
 use App\Message\EnrichDestContinentMessage;
+use App\Message\EnrichSourceContinentMessage;
 use App\Repository\CallRepository;
 use App\Repository\ContinentPhonePrefixRepository;
 use App\Repository\UploadedFileRepository;
@@ -146,9 +147,14 @@ class CallsCsvProcessor
 
             // Dispatch a message to enrich dest_continent for calls with empty dest_continent
             // Use the new approach with start and end indexes
-            $offset = $this->parameterBag->get('enrich_dest_continent_offset');
-            $message = new EnrichDestContinentMessage($uploadedFile->getId(), 0, $offset, $offset);
-            $this->messageBus->dispatch($message);
+            $destOffset = $this->parameterBag->get('enrich_dest_continent_offset');
+            $destMessage = new EnrichDestContinentMessage($uploadedFile->getId(), 0, $destOffset, $destOffset);
+            $this->messageBus->dispatch($destMessage);
+
+            // Dispatch a message to enrich source_continent for calls with empty source_continent
+            $sourceOffset = $this->parameterBag->get('enrich_source_continent_offset');
+            $sourceMessage = new EnrichSourceContinentMessage($uploadedFile->getId(), 0, $sourceOffset, $sourceOffset);
+            $this->messageBus->dispatch($sourceMessage);
 
             return true;
         } catch (\Exception $e) {

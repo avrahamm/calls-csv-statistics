@@ -6,6 +6,8 @@
 parameters:
     upload_path: '%env(UPLOAD_PATH)%'
     enrich_dest_continent_offset: '%env(int:ENRICH_DEST_CONTINENT_OFFSET)%'
+    enrich_source_continent_offset: '%env(int:ENRICH_SOURCE_CONTINENT_OFFSET)%'
+    ip_geolocation_api_key: '%env(IP_GEOLOCATION_API_KEY)%'
 
 services:
     # default configuration for services in *this* file
