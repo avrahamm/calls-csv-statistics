@@ -31,6 +31,12 @@ class UploadedFile
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $error_message = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $phones_enriched = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $ips_enriched = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -92,6 +98,30 @@ class UploadedFile
     public function setErrorMessage(?string $error_message): self
     {
         $this->error_message = $error_message;
+
+        return $this;
+    }
+
+    public function getPhonesEnriched(): ?\DateTimeInterface
+    {
+        return $this->phones_enriched;
+    }
+
+    public function setPhonesEnriched(?\DateTimeInterface $phones_enriched): self
+    {
+        $this->phones_enriched = $phones_enriched;
+
+        return $this;
+    }
+
+    public function getIpsEnriched(): ?\DateTimeInterface
+    {
+        return $this->ips_enriched;
+    }
+
+    public function setIpsEnriched(?\DateTimeInterface $ips_enriched): self
+    {
+        $this->ips_enriched = $ips_enriched;
 
         return $this;
     }

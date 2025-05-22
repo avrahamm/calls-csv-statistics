@@ -64,4 +64,58 @@ class UploadedFileRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Update phones_enriched timestamp with pessimistic locking to avoid race conditions
+     */
+    public function updatePhonesEnriched(int $fileId): bool
+    {
+        try {
+            $em = $this->getEntityManager();
+
+            // Get the entity with a lock
+            $file = $this->find($fileId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE);
+
+            if (!$file) {
+                return false;
+            }
+
+            // Update the field
+            $file->setPhonesEnriched(new \DateTime());
+
+            // Save the changes
+            $em->flush();
+
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Update ips_enriched timestamp with pessimistic locking to avoid race conditions
+     */
+    public function updateIpsEnriched(int $fileId): bool
+    {
+        try {
+            $em = $this->getEntityManager();
+
+            // Get the entity with a lock
+            $file = $this->find($fileId, \Doctrine\DBAL\LockMode::PESSIMISTIC_WRITE);
+
+            if (!$file) {
+                return false;
+            }
+
+            // Update the field
+            $file->setIpsEnriched(new \DateTime());
+
+            // Save the changes
+            $em->flush();
+
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }

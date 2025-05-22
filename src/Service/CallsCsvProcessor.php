@@ -197,9 +197,9 @@ class CallsCsvProcessor
         // For now, we'll leave source_continent as null
 
         // Set within_same_cont if both source and destination continents are known
-        if ($call->getSourceContinent() !== null && $call->getDestContinent() !== null) {
-            $call->setWithinSameCont($call->getSourceContinent() === $call->getDestContinent());
-        }
+//        if ($call->getSourceContinent() !== null && $call->getDestContinent() !== null) {
+//            $call->setWithinSameCont($call->getSourceContinent() === $call->getDestContinent());
+//        }
 
         return $call;
     }
