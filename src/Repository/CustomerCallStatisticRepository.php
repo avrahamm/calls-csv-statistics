@@ -41,6 +41,56 @@ class CustomerCallStatisticRepository extends ServiceEntityRepository
     }
 
     /**
+     * Find statistics that have been updated since a given date for specific customer IDs
+     * and return a list of all current customer IDs
+     *
+     * @param array $customerUpdates Array of [customer_id => last_updated] pairs
+     * @return array [updatedStatistics, allCustomerIds]
+     * @throws \Exception
+     */
+    public function findUpdatedStatistics(array $customerUpdates): array
+    {
+        // Get all current customer IDs from the database
+        $allStatistics = $this->findAll();
+        $allCustomerIds = [];
+        foreach ($allStatistics as $statistic) {
+            $allCustomerIds[] = $statistic->getCustomerId();
+        }
+
+        if (empty($customerUpdates)) {
+            return ['updatedStatistics' => [], 'allCustomerIds' => $allCustomerIds];
+        }
+
+        $updatedStatistics = [];
+
+        foreach ($customerUpdates as $customerId => $lastUpdated) {
+            $lastUpdatedDate = new \DateTime($lastUpdated);
+            $statistic = $this->find($customerId);
+
+            if ($statistic && $statistic->getLastUpdated() > $lastUpdatedDate) {
+                $updatedStatistics[] = $statistic;
+            }
+        }
+
+        // Find new customer IDs that weren't in the client's list
+        $newStatistics = [];
+        foreach ($allStatistics as $statistic) {
+            $customerId = $statistic->getCustomerId();
+            if (!isset($customerUpdates[$customerId])) {
+                $newStatistics[] = $statistic;
+            }
+        }
+
+        // Combine updated and new statistics
+        $updatedStatistics = array_merge($updatedStatistics, $newStatistics);
+
+        return [
+            'updatedStatistics' => $updatedStatistics,
+            'allCustomerIds' => $allCustomerIds
+        ];
+    }
+
+    /**
      * Update customer call statistics with delta values from an uploaded file
      *
      * @param array $statistics Array of statistics grouped by customer_id
