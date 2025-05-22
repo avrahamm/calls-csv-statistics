@@ -61,6 +61,8 @@ This script will:
 - Create a basic React application structure
 - Configure Webpack Encore for React
 - Create a Symfony controller for the SPA
+- Run database migrations
+- Import continent phone prefixes from sample data
 - Build the assets
 
 ### 4. Access the Application
