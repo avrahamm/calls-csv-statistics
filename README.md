@@ -2,6 +2,20 @@
 
 This repository contains a Docker setup for developing a Symfony application with a React single-page application (SPA).
 
+## Steps to build a project.
+
+
+- git clone https://github.com/avrahamm/calls-csv-statistics.git
+
+- cd calls-csv-statistics/
+- cp .env.example .env
+- # edit IP_GEOLOCATION_API_KEY and other env variables if needed. 
+- Automatic setup script for Symfony and React
+- Live code syncing between host and containers for immediate development
+
+
+
+
 ## Features
 
 - PHP 8.1 with all extensions required for Symfony

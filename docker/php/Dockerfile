@@ -58,7 +58,9 @@ RUN sed -i 's/^user = www-data/;user = www-data/' /usr/local/etc/php-fpm.d/www.c
 # Switch to appuser for subsequent operations
 USER appuser
 
-# Expose port 9000 for PHP-FPM
-EXPOSE 9000
+# Expose port from environment variable for PHP-FPM
+ARG PHP_PORT=9000
+ENV PHP_PORT=${PHP_PORT}
+EXPOSE ${PHP_PORT}
 
 CMD ["php-fpm"]

@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
+      args:
+        PHP_PORT: ${PHP_PORT}
     container_name: ${PHP_CONTAINER_NAME}
     working_dir: /app
     user: appuser
@@ -18,12 +20,15 @@ services:
       - database
     environment:
       DATABASE_URL: ${DOCKER_DATABASE_URL}
+      PHP_PORT: ${PHP_PORT}
 
   # Queue worker service
   worker:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
+      args:
+        PHP_PORT: ${PHP_PORT}
     container_name: ${WORKER_CONTAINER_NAME}
     working_dir: /app
     user: appuser
@@ -37,6 +42,7 @@ services:
       - database
     environment:
       DATABASE_URL: ${DOCKER_DATABASE_URL}
+      PHP_PORT: ${PHP_PORT}
 
   # Web server (Nginx)
   nginx:
