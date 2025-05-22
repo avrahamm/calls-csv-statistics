@@ -20,7 +20,7 @@ if [ ! -f "composer.json" ]; then
         composer clear-cache
         composer install --optimize-autoloader
         bin/console cache:clear
-        php bin/console doctrine:migrations:migrate
+        php bin/console doctrine:migrations:migrate --no-interaction
     else
         echo "Directory is not empty, creating Symfony project using Symfony CLI..."
         # Create a temporary directory
@@ -38,7 +38,7 @@ if [ ! -f "composer.json" ]; then
         composer clear-cache
         composer install --optimize-autoloader
         bin/console cache:clear
-        php bin/console doctrine:migrations:migrate
+        php bin/console doctrine:migrations:migrate --no-interaction
 
         # Copy the files to the current directory
         cp -r * /app/
@@ -59,7 +59,7 @@ else
     composer clear-cache
     composer install --optimize-autoloader
     bin/console cache:clear
-    php bin/console doctrine:migrations:migrate
+    php bin/console doctrine:migrations:migrate --no-interaction
 
 fi
 
