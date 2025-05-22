@@ -115,6 +115,9 @@ class CallRepository extends ServiceEntityRepository
         $connection = $this->getEntityManager()->getConnection();
 
         try {
+            // Begin transaction
+            $connection->beginTransaction();
+
             // Create a temporary table with explicit collation to match the "calls" table
             $connection->executeStatement('
                 CREATE TEMPORARY TABLE tmp_phone_continent (
@@ -156,8 +159,16 @@ class CallRepository extends ServiceEntityRepository
             // Drop the temporary table
             $connection->executeStatement('DROP TEMPORARY TABLE IF EXISTS tmp_phone_continent');
 
+            // Commit the transaction
+            $connection->commit();
+
             return $result;
         } catch (\Exception $e) {
+            // Rollback the transaction in case of an error
+            if ($connection->isTransactionActive()) {
+                $connection->rollBack();
+            }
+
             // Ensure the temporary table is dropped even if an error occurs
             try {
                 $connection->executeStatement('DROP TEMPORARY TABLE IF EXISTS tmp_phone_continent');
@@ -221,6 +232,9 @@ class CallRepository extends ServiceEntityRepository
         $connection = $this->getEntityManager()->getConnection();
 
         try {
+            // Begin transaction
+            $connection->beginTransaction();
+
             // Create a temporary table with explicit collation to match the "calls" table
             $connection->executeStatement('
                 CREATE TEMPORARY TABLE tmp_ip_continent (
@@ -262,8 +276,16 @@ class CallRepository extends ServiceEntityRepository
             // Drop the temporary table
             $connection->executeStatement('DROP TEMPORARY TABLE IF EXISTS tmp_ip_continent');
 
+            // Commit the transaction
+            $connection->commit();
+
             return $result;
         } catch (\Exception $e) {
+            // Rollback the transaction in case of an error
+            if ($connection->isTransactionActive()) {
+                $connection->rollBack();
+            }
+
             // Ensure the temporary table is dropped even if an error occurs
             try {
                 $connection->executeStatement('DROP TEMPORARY TABLE IF EXISTS tmp_ip_continent');

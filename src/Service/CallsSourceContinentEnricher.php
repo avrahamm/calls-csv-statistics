@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Repository\CallRepository;
+use App\Repository\IpGeolocationCacheRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -13,17 +14,20 @@ class CallsSourceContinentEnricher
     private LoggerInterface $logger;
     private HttpClientInterface $httpClient;
     private ParameterBagInterface $parameterBag;
+    private IpGeolocationCacheRepository $ipGeolocationCacheRepository;
 
     public function __construct(
         CallRepository $callRepository,
         LoggerInterface $logger,
         HttpClientInterface $httpClient,
-        ParameterBagInterface $parameterBag
+        ParameterBagInterface $parameterBag,
+        IpGeolocationCacheRepository $ipGeolocationCacheRepository
     ) {
         $this->callRepository = $callRepository;
         $this->logger = $logger;
         $this->httpClient = $httpClient;
         $this->parameterBag = $parameterBag;
+        $this->ipGeolocationCacheRepository = $ipGeolocationCacheRepository;
     }
 
     /**
@@ -42,35 +46,54 @@ class CallsSourceContinentEnricher
 
         $totalUpdated = 0;
         $apiKey = $this->parameterBag->get('ip_geolocation_api_key');
-
-        // Process IPs one by one for now (naive implementation)
-        // In future steps, we will convert it to batch style
         $ipToContinent = [];
-        
-        foreach ($uniqueIps as $ip) {
-            try {
-                $continentCode = $this->getContinentCodeByIp($ip, $apiKey);
-                
-                if ($continentCode !== null) {
-                    $ipToContinent[$ip] = $continentCode;
+
+        // Step 1: Check if IPs exist in the ip_geolocation_cache table
+        $cachedIpData = $this->ipGeolocationCacheRepository->findContinentCodesForIps($uniqueIps);
+
+        // Add cached IPs to the result dictionary
+        $ipToContinent = $cachedIpData;
+
+        // Step 2: Find IPs not in the cache
+        $ipsToFetch = array_diff($uniqueIps, array_keys($cachedIpData));
+
+        if (!empty($ipsToFetch)) {
+            $newIpData = [];
+
+            // Process IPs not found in cache
+            foreach ($ipsToFetch as $ip) {
+                try {
+                    $continentCode = $this->getContinentCodeByIp($ip, $apiKey);
+
+                    if ($continentCode !== null) {
+                        $ipToContinent[$ip] = $continentCode;
+                        $newIpData[$ip] = $continentCode;
+                    }
+                } catch (\Exception $e) {
+                    $this->logger->error('Error fetching continent code for IP', [
+                        'ip' => $ip,
+                        'error' => $e->getMessage()
+                    ]);
                 }
-            } catch (\Exception $e) {
-                $this->logger->error('Error fetching continent code for IP', [
-                    'ip' => $ip,
-                    'error' => $e->getMessage()
-                ]);
+            }
+
+            // Step 3: Update the cache with new IP data
+            if (!empty($newIpData)) {
+                try {
+                    $this->ipGeolocationCacheRepository->insertBulk($newIpData);
+                } catch (\Exception $e) {
+                    $this->logger->error('Error updating IP geolocation cache', [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                }
             }
         }
 
+        // Step 4: Update source_continent for calls with matching source_ip in bulk
         if (!empty($ipToContinent)) {
-            // Update source_continent for calls with matching source_ip in bulk
             $updated = $this->callRepository->updateSourceContinentInBulk($ipToContinent);
             $totalUpdated += $updated;
-
-            $this->logger->debug('Updated source_continent for IPs', [
-                'ips_count' => count($ipToContinent),
-                'updated_calls' => $updated
-            ]);
         }
 
         $this->logger->info('Completed enriching source_continent for calls', [
@@ -91,18 +114,35 @@ class CallsSourceContinentEnricher
     private function getContinentCodeByIp(string $ip, string $apiKey): ?string
     {
         $url = "https://api.ipgeolocation.io/ipgeo";
-        
-        $response = $this->httpClient->request('GET', $url, [
-            'query' => [
-                'apiKey' => $apiKey,
-                'ip' => $ip,
-                'fields' => 'continent_code'
-            ]
-        ]);
 
-        if ($response->getStatusCode() === 200) {
-            $data = $response->toArray();
-            return $data['continent_code'] ?? null;
+        try {
+            $response = $this->httpClient->request('GET', $url, [
+                'query' => [
+                    'apiKey' => $apiKey,
+                    'ip' => $ip,
+                    'fields' => 'continent_code'
+                ]
+            ]);
+
+            $statusCode = $response->getStatusCode();
+
+            if ($statusCode === 200) {
+                $data = $response->toArray();
+                $continentCode = $data['continent_code'] ?? null;
+
+                return $continentCode;
+            } else {
+                $this->logger->warning('Received non-200 status code from ipgeolocation.io', [
+                    'ip' => $ip,
+                    'status_code' => $statusCode
+                ]);
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('Exception while making API call to ipgeolocation.io', [
+                'ip' => $ip,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
         }
 
         return null;
