@@ -217,6 +217,87 @@ If the application cannot connect to the database, ensure that:
 2. The DATABASE_URL in the .env file matches the configuration in docker-compose.yml (or compose.yaml)
 3. The database has been created: `docker compose exec database mysql -u symfony -psymfony -e "SHOW DATABASES;"`
 
+## Parallel CSV Processing
+
+This application includes an optimized system for processing large CSV files containing call data. The system uses parallel processing to significantly improve performance when handling large datasets.
+
+### Overview
+
+The parallel processing approach follows these key steps:
+
+1. **File Splitting**: Large CSV files are split into smaller chunks using the Linux `split` utility
+2. **Parallel Processing**: Each chunk is processed independently and concurrently
+3. **Staging Table**: Data is first written to a staging table for validation
+4. **Final Commit**: Valid data is transferred to the final table in a single transaction
+5. **Cleanup**: Temporary files and staging data are removed after processing
+
+### Architecture Components
+
+#### Environment Configuration
+
+The system uses the following environment variables:
+- `UPLOAD_PATH`: Directory for uploaded CSV files
+- `CHUNKS_PATH`: Directory for temporary chunk files (set to `${UPLOAD_PATH}/chunks`)
+
+#### File Splitting Process
+
+The `ParallelCallsCsvProcessor` service:
+- Generates a unique batch ID for each import operation
+- Splits the input CSV file into chunks of 15 lines each using the `split` command
+- Creates a unique prefix for chunk filenames to avoid conflicts
+
+#### Message-Based Architecture
+
+The system uses Symfony Messenger for asynchronous processing:
+- `ProcessUploadedFileChunkMessage`: Dispatched for each chunk file
+- `FinalizeCallsImportMessage`: Dispatched after all chunks are queued for processing
+- Messages are processed by dedicated handlers that can run in parallel
+
+#### Staging Table Approach
+
+The `calls_staging` table:
+- Mirrors the structure of the final `calls` table
+- Includes additional columns for tracking:
+  - `batch_id`: Unique identifier for the import operation
+  - `chunk_filename`: Name of the chunk file
+  - `row_number_in_chunk`: Position of the row in the chunk
+  - `is_valid`: Flag indicating if the row passed validation
+  - `error_message`: Details of any validation errors
+
+#### Error Handling and Validation
+
+Each row undergoes validation:
+- Data type checking
+- Required field validation
+- Format validation (e.g., valid IP addresses)
+- Invalid rows are marked in the staging table but don't prevent processing of valid rows
+- If any invalid rows are found, the entire batch is rejected during finalization
+
+#### Finalization Process
+
+The `FinalizeCallsImportMessageHandler`:
+- Checks if all rows in the staging table are valid
+- Transfers valid data to the final `calls` table in a single transaction
+- Updates the status of the uploaded file record
+- Cleans up the staging table and temporary chunk files
+- Dispatches messages for enriching continent data
+
+### Usage
+
+To process a CSV file using parallel processing:
+
+```bash
+php bin/console app:process-calls-csv-parallel path/to/file.csv
+```
+
+### Benefits
+
+- **Improved Performance**: Processing large files in parallel significantly reduces total processing time
+- **Scalability**: The system can scale to handle very large files by adjusting the chunk size
+- **Reliability**: Transaction-based approach ensures data integrity
+- **Error Isolation**: Issues in one chunk don't affect processing of other chunks
+- **Detailed Error Reporting**: Precise tracking of which rows had issues and why
+
 ## License
 
 [MIT License](LICENSE)
