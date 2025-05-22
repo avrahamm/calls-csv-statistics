@@ -296,4 +296,46 @@ class CallRepository extends ServiceEntityRepository
             throw $e;
         }
     }
+
+    /**
+     * Update within_same_cont field for all calls in a file where both source_continent and dest_continent are set
+     * 
+     * @param int $uploadedFileId The ID of the uploaded file
+     * @return int Number of updated records
+     */
+    public function updateWithinSameContinent(int $uploadedFileId): int
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        try {
+            // Begin transaction
+            $connection->beginTransaction();
+
+            // Update calls table - set within_same_cont to true if source_continent equals dest_continent
+            $updateSql = '
+                UPDATE calls
+                SET within_same_cont = (source_continent = dest_continent)
+                WHERE uploaded_file_id = :uploadedFileId
+                AND source_continent IS NOT NULL
+                AND dest_continent IS NOT NULL
+                AND within_same_cont IS NULL
+            ';
+
+            $stmt = $connection->prepare($updateSql);
+            $stmt->bindValue('uploadedFileId', $uploadedFileId, \PDO::PARAM_INT);
+            $result = $stmt->executeStatement();
+
+            // Commit the transaction
+            $connection->commit();
+
+            return $result;
+        } catch (\Exception $e) {
+            // Rollback the transaction in case of an error
+            if ($connection->isTransactionActive()) {
+                $connection->rollBack();
+            }
+
+            throw $e;
+        }
+    }
 }

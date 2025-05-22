@@ -3,6 +3,7 @@
 namespace App\MessageHandler;
 
 use App\Message\EnrichDestContinentMessage;
+use App\Message\EnrichWithinSameContMessage;
 use App\Repository\CallRepository;
 use App\Repository\UploadedFileRepository;
 use App\Service\CallsDestContinentEnricher;
@@ -68,6 +69,15 @@ class EnrichDestContinentMessageHandler
                     $this->logger->info('Updated phones_enriched timestamp', [
                         'uploaded_file_id' => $uploadedFileId
                     ]);
+
+                    // Check if both enrichments are complete
+                    if ($this->uploadedFileRepository->areBothEnrichmentsComplete($uploadedFileId)) {
+                        // Dispatch a message to update within_same_cont
+                        $this->messageBus->dispatch(new EnrichWithinSameContMessage($uploadedFileId));
+                        $this->logger->info('Dispatched EnrichWithinSameContMessage', [
+                            'uploaded_file_id' => $uploadedFileId
+                        ]);
+                    }
                 } else {
                     $this->logger->warning('Failed to update phones_enriched timestamp', [
                         'uploaded_file_id' => $uploadedFileId
@@ -117,6 +127,15 @@ class EnrichDestContinentMessageHandler
                     $this->logger->info('Updated phones_enriched timestamp', [
                         'uploaded_file_id' => $uploadedFileId
                     ]);
+
+                    // Check if both enrichments are complete
+                    if ($this->uploadedFileRepository->areBothEnrichmentsComplete($uploadedFileId)) {
+                        // Dispatch a message to update within_same_cont
+                        $this->messageBus->dispatch(new EnrichWithinSameContMessage($uploadedFileId));
+                        $this->logger->info('Dispatched EnrichWithinSameContMessage', [
+                            'uploaded_file_id' => $uploadedFileId
+                        ]);
+                    }
                 } else {
                     $this->logger->warning('Failed to update phones_enriched timestamp', [
                         'uploaded_file_id' => $uploadedFileId

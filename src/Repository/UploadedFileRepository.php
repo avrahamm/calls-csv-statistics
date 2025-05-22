@@ -128,4 +128,35 @@ class UploadedFileRepository extends ServiceEntityRepository
             return false;
         }
     }
+
+    /**
+     * Check if both phones_enriched and ips_enriched are set for a given file
+     * 
+     * @param int $fileId The ID of the uploaded file
+     * @return bool True if both enrichments are complete, false otherwise
+     */
+    public function areBothEnrichmentsComplete(int $fileId): bool
+    {
+        try {
+            $em = $this->getEntityManager();
+
+            // Clear entity manager to avoid caching issues
+            $em->clear();
+
+            $connection = $em->getConnection();
+
+            $sql = 'SELECT COUNT(*) FROM uploaded_files 
+                    WHERE id = :id 
+                    AND phones_enriched IS NOT NULL 
+                    AND ips_enriched IS NOT NULL';
+
+            $stmt = $connection->prepare($sql);
+            $stmt->bindValue('id', $fileId, \PDO::PARAM_INT);
+            $result = $stmt->executeQuery();
+
+            return (int) $result->fetchOne() > 0;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }
