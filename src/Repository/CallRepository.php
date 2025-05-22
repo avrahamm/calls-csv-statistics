@@ -338,4 +338,33 @@ class CallRepository extends ServiceEntityRepository
             throw $e;
         }
     }
+    /**
+     * Get call statistics for a specific uploaded file
+     * 
+     * @param int $uploadedFileId The ID of the uploaded file
+     * @return array Array of statistics grouped by customer_id
+     */
+    public function getCallStatisticsByUploadedFileId(int $uploadedFileId): array
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $sql = '
+            SELECT 
+                customer_id,
+                SUM(CASE WHEN within_same_cont = 1 THEN 1 ELSE 0 END) as num_calls_within_same_continent,
+                SUM(CASE WHEN within_same_cont = 1 THEN duration ELSE 0 END) as total_duration_within_same_cont,
+                COUNT(*) as total_num_calls,
+                SUM(duration) as total_calls_duration
+            FROM calls
+            WHERE uploaded_file_id = :uploadedFileId
+            AND within_same_cont IS NOT NULL
+            GROUP BY customer_id
+        ';
+
+        $stmt = $connection->prepare($sql);
+        $stmt->bindValue('uploadedFileId', $uploadedFileId, \PDO::PARAM_INT);
+        $result = $stmt->executeQuery();
+
+        return $result->fetchAllAssociative();
+    }
 }
