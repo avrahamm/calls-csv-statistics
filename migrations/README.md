@@ -1,85 +1,54 @@
-# Resetting Migration History in Symfony
+# Clean Migration Files for Database Setup
 
-This document explains how to reset the migration history in a Symfony project to create a minimal migration that represents the current state of the database.
+This directory contains clean migration files for setting up the database structure from scratch. Each migration file creates a single table in the database.
 
-## Background
+## Migration Files
 
-When working with Symfony's Doctrine migrations, you may end up with many migration files that represent the incremental changes made to the database schema over time. In some cases, you might want to consolidate these migrations into a single migration that represents the current state of the database.
+1. `Version20250523101641.php` - Creates the `calls` table
+2. `Version20250523101714.php` - Creates the `calls_staging` table
+3. `Version20250523101747.php` - Creates the `continent_phone_prefix` table
+4. `Version20250523101815.php` - Creates the `customer_call_statistics` table
+5. `Version20250523101846.php` - Creates the `ip_geolocation_cache` table
+6. `Version20250523101916.php` - Creates the `messenger_messages` table
+7. `Version20250523101948.php` - Creates the `uploaded_files` table
+8. `Version20250523102019.php` - Creates the `doctrine_migration_versions` table
 
-## Steps to Reset Migration History
+## Running the Migrations
 
-1. **Backup existing migrations**
-   ```bash
-   mkdir -p migrations_backup && cp migrations/*.php migrations_backup/
-   ```
-
-2. **Delete existing migration files**
-   ```bash
-   rm migrations/Version*.php
-   ```
-
-3. **Generate a new empty migration**
-   ```bash
-   bin/console doctrine:migrations:generate
-   ```
-
-4. **Extract the current database schema**
-   You can use MySQL commands to extract the CREATE TABLE statements for each table in your database:
-   ```bash
-   docker exec -it database-container mysql -u root -ppassword -e "SHOW CREATE TABLE database.table_name\G"
-   ```
-
-5. **Modify the migration file**
-   Edit the generated migration file to include the CREATE TABLE statements in the `up()` method and DROP TABLE statements in the `down()` method.
-
-   If the tables already exist in the database, you can create a placeholder migration that doesn't actually create any tables:
-   ```php
-   public function up(Schema $schema): void
-   {
-       // This migration is just a placeholder to mark the current schema state
-       // All tables already exist in the database, so we don't need to create them again
-       $this->addSql('SELECT 1');
-       
-       // The actual schema includes the following tables:
-       // - table1
-       // - table2
-       // - etc.
-   }
-   ```
-
-6. **Clear the migration table**
-   ```bash
-   docker exec -it database-container mysql -u root -ppassword -e "TRUNCATE TABLE database.doctrine_migration_versions;"
-   ```
-
-7. **Execute the new migration**
-   ```bash
-   bin/console doctrine:migrations:execute 'DoctrineMigrations\VersionXXXXXXXXXXXXXX' --up
-   ```
-
-8. **Verify the migration status**
-   ```bash
-   bin/console doctrine:migrations:status
-   ```
-
-## Alternative Approaches
-
-### Using doctrine:migrations:dump-schema
-
-If your database doesn't use MySQL-specific types like ENUM, you can use the `doctrine:migrations:dump-schema` command to create a migration that represents the current schema:
+To run all migrations and set up the database structure from scratch, use the following command:
 
 ```bash
-bin/console doctrine:migrations:dump-schema
+bin/console doctrine:migrations:migrate
 ```
 
-### Using doctrine:migrations:rollup
+This will execute all migration files in order, creating all the necessary tables in the database.
 
-After dumping the schema, you can use the `doctrine:migrations:rollup` command to delete all tracked versions and insert only the new one:
+## Individual Migration Execution
+
+If you want to run a specific migration, you can use the following command:
 
 ```bash
-bin/console doctrine:migrations:rollup
+bin/console doctrine:migrations:execute --up 'DoctrineMigrations\Version20250523101641'
 ```
 
-## Conclusion
+Replace `Version20250523101641` with the version number of the migration you want to execute.
 
-By following these steps, you can reset your migration history to have a single migration that represents the current state of your database. This can be useful for simplifying your migration history and making it easier to manage.
+## Reverting Migrations
+
+To revert a specific migration, you can use the following command:
+
+```bash
+bin/console doctrine:migrations:execute --down 'DoctrineMigrations\Version20250523101641'
+```
+
+Replace `Version20250523101641` with the version number of the migration you want to revert.
+
+## Migration Status
+
+To check the status of all migrations, use the following command:
+
+```bash
+bin/console doctrine:migrations:status
+```
+
+This will show you which migrations have been executed and which are still pending.
