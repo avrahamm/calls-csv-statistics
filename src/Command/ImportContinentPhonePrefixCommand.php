@@ -66,7 +66,7 @@ class ImportContinentPhonePrefixCommand extends Command
                 continue;
             }
 
-            $io->info(sprintf('Processing row: %s', implode(', ', $data)));
+//            $io->info(sprintf('Processing row: %s', implode(', ', $data)));
 
             $continentCode = $data[1];
             $phonePrefix = $data[2];

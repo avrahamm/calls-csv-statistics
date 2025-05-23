@@ -11,6 +11,8 @@ services:
     user: appuser
     command: >
       sh -c "sudo chown -R appuser:appuser /app && \
+       mkdir -p /app/var/cache && \
+       chmod -R 777 /app/var/cache && \
        chmod +x /app/setup.sh && \
        /app/setup.sh && \
        php-fpm"
@@ -41,6 +43,10 @@ services:
     restart: unless-stopped
     command: >
       sh -c "sudo chown -R appuser:appuser /app && \
+       mkdir -p /app/var/cache && \
+       chmod -R 777 /app/var/cache && \
+       chmod +x /app/setup.sh && \
+       /app/setup.sh && \
        bin/console messenger:consume async --time-limit=${WORKER_TIME_LIMIT} --memory-limit=${WORKER_MEMORY_LIMIT}"
     volumes:
       - ./:/app
