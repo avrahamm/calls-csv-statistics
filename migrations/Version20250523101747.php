@@ -19,7 +19,7 @@ final class Version20250523101747 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('CREATE TABLE continent_phone_prefix (
+        $this->addSql('CREATE TABLE IF NOT EXISTS continent_phone_prefix (
             phone_prefix VARCHAR(16) NOT NULL,
             continent_code VARCHAR(2) NOT NULL,
             PRIMARY KEY(phone_prefix)

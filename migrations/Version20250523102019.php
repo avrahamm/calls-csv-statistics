@@ -19,7 +19,7 @@ final class Version20250523102019 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('CREATE TABLE doctrine_migration_versions (
+        $this->addSql('CREATE TABLE IF NOT EXISTS doctrine_migration_versions (
             version VARCHAR(191) NOT NULL,
             executed_at DATETIME DEFAULT NULL,
             execution_time INT DEFAULT NULL,

@@ -19,7 +19,7 @@ final class Version20250523101846 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('CREATE TABLE ip_geolocation_cache (
+        $this->addSql('CREATE TABLE IF NOT EXISTS ip_geolocation_cache (
             ip_address VARCHAR(45) NOT NULL,
             continent_code VARCHAR(2) NOT NULL,
             last_checked DATETIME NOT NULL,

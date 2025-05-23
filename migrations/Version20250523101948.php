@@ -19,7 +19,7 @@ final class Version20250523101948 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('CREATE TABLE uploaded_files (
+        $this->addSql('CREATE TABLE IF NOT EXISTS uploaded_files (
             id INT AUTO_INCREMENT NOT NULL,
             file_name VARCHAR(255) NOT NULL,
             uploaded_at DATETIME NOT NULL,

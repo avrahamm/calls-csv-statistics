@@ -19,7 +19,7 @@ final class Version20250523101641 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('CREATE TABLE calls (
+        $this->addSql('CREATE TABLE IF NOT EXISTS calls (
             id INT AUTO_INCREMENT NOT NULL, 
             customer_id INT NOT NULL, 
             call_date DATETIME NOT NULL, 

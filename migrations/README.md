@@ -23,6 +23,10 @@ bin/console doctrine:migrations:migrate
 
 This will execute all migration files in order, creating all the necessary tables in the database.
 
+### Table Existence Check
+
+All migration files include the `IF NOT EXISTS` clause in their CREATE TABLE statements. This ensures that tables are only created if they don't already exist in the database. This is useful when running migrations on a database that might already have some of the tables created.
+
 ## Individual Migration Execution
 
 If you want to run a specific migration, you can use the following command:
