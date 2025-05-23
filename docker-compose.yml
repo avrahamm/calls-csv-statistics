@@ -17,10 +17,16 @@ services:
     volumes:
       - ./:/app
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     environment:
       DATABASE_URL: ${DOCKER_DATABASE_URL}
       PHP_PORT: ${PHP_PORT}
+    healthcheck:
+      test: ["CMD", "php", "-r", "if (@fsockopen('localhost', getenv('PHP_PORT'))) { exit(0); } else { exit(1); }"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   # Queue worker service
   worker:
@@ -39,7 +45,8 @@ services:
     volumes:
       - ./:/app
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     environment:
       DATABASE_URL: ${DOCKER_DATABASE_URL}
       PHP_PORT: ${PHP_PORT}
@@ -58,7 +65,8 @@ services:
       - PHP_PORT=${PHP_PORT}
     command: /bin/sh -c "envsubst '$$PHP_CONTAINER_NAME $$PHP_PORT' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
     depends_on:
-      - php
+      php:
+        condition: service_healthy
 
   # MySQL database
   database:
@@ -73,6 +81,11 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # Node service for React development
   node:
