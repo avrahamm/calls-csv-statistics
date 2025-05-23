@@ -165,6 +165,32 @@ EOL
 EOL
 fi
 
+echo "Creating upload directories..."
+# Extract paths from .env file
+UPLOAD_PATH=$(grep -E "^UPLOAD_PATH=" .env | cut -d= -f2)
+CHUNKS_PATH=$(grep -E "^CHUNKS_PATH=" .env | cut -d= -f2)
+
+# Use default values if not found
+if [ -z "$UPLOAD_PATH" ]; then
+    UPLOAD_PATH="public/calls-data"
+fi
+
+if [ -z "$CHUNKS_PATH" ]; then
+    CHUNKS_PATH="${UPLOAD_PATH}/chunks"
+fi
+
+# Resolve variable references in CHUNKS_PATH
+if [[ "$CHUNKS_PATH" == *'${UPLOAD_PATH}'* ]]; then
+    CHUNKS_PATH=${CHUNKS_PATH//\$\{UPLOAD_PATH\}/$UPLOAD_PATH}
+fi
+
+# Create directories
+echo "Creating directory: $UPLOAD_PATH"
+mkdir -p "$UPLOAD_PATH"
+echo "Creating directory: $CHUNKS_PATH"
+mkdir -p "$CHUNKS_PATH"
+echo "Upload directories created."
+
 echo "Building assets..."
 # Ensure Stimulus packages are installed
 yarn add @hotwired/stimulus @symfony/stimulus-bridge
