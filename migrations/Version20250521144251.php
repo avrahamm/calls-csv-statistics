@@ -20,12 +20,62 @@ final class Version20250521144251 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // Remove createdAt and updatedAt columns from uploaded_files table
-        $this->addSql('ALTER TABLE uploaded_files DROP createdAt, DROP updatedAt');
+        $this->addSql(<<<'SQL'
+            SET @column_exists = (
+                SELECT COUNT(*)
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'uploaded_files'
+                AND COLUMN_NAME = 'createdAt'
+            );
+            SET @sql = IF(@column_exists > 0, 'ALTER TABLE uploaded_files DROP COLUMN createdAt', 'SELECT 1');
+            PREPARE stmt FROM @sql;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+        SQL);
+        $this->addSql(<<<'SQL'
+            SET @column_exists = (
+                SELECT COUNT(*)
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'uploaded_files'
+                AND COLUMN_NAME = 'updatedAt'
+            );
+            SET @sql = IF(@column_exists > 0, 'ALTER TABLE uploaded_files DROP COLUMN updatedAt', 'SELECT 1');
+            PREPARE stmt FROM @sql;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+        SQL);
     }
 
     public function down(Schema $schema): void
     {
         // Add createdAt and updatedAt columns back to uploaded_files table
-        $this->addSql('ALTER TABLE uploaded_files ADD createdAt DATETIME NOT NULL, ADD updatedAt DATETIME NOT NULL');
+        $this->addSql(<<<'SQL'
+            SET @column_exists = (
+                SELECT COUNT(*)
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'uploaded_files'
+                AND COLUMN_NAME = 'createdAt'
+            );
+            SET @sql = IF(@column_exists = 0, 'ALTER TABLE uploaded_files ADD COLUMN createdAt DATETIME NOT NULL', 'SELECT 1');
+            PREPARE stmt FROM @sql;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+        SQL);
+        $this->addSql(<<<'SQL'
+            SET @column_exists = (
+                SELECT COUNT(*)
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'uploaded_files'
+                AND COLUMN_NAME = 'updatedAt'
+            );
+            SET @sql = IF(@column_exists = 0, 'ALTER TABLE uploaded_files ADD COLUMN updatedAt DATETIME NOT NULL', 'SELECT 1');
+            PREPARE stmt FROM @sql;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
+        SQL);
     }
 }

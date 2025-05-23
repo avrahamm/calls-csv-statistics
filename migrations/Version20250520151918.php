@@ -21,10 +21,30 @@ final class Version20250520151918 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            DROP INDEX `primary` ON country_phone_prefix
+            SET @constraint_name = (
+                SELECT CONSTRAINT_NAME
+                FROM information_schema.TABLE_CONSTRAINTS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'country_phone_prefix'
+                AND CONSTRAINT_TYPE = 'PRIMARY KEY'
+            );
+            SET @sql = IF(@constraint_name IS NOT NULL, 'ALTER TABLE country_phone_prefix DROP PRIMARY KEY', 'SELECT 1');
+            PREPARE stmt FROM @sql;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE country_phone_prefix DROP country_code
+            SET @column_exists = (
+                SELECT COUNT(*)
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'country_phone_prefix'
+                AND COLUMN_NAME = 'country_code'
+            );
+            SET @sql = IF(@column_exists > 0, 'ALTER TABLE country_phone_prefix DROP COLUMN country_code', 'SELECT 1');
+            PREPARE stmt FROM @sql;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE country_phone_prefix ADD PRIMARY KEY (phone_prefix)
@@ -35,10 +55,30 @@ final class Version20250520151918 extends AbstractMigration
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            DROP INDEX `PRIMARY` ON country_phone_prefix
+            SET @constraint_name = (
+                SELECT CONSTRAINT_NAME
+                FROM information_schema.TABLE_CONSTRAINTS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'country_phone_prefix'
+                AND CONSTRAINT_TYPE = 'PRIMARY KEY'
+            );
+            SET @sql = IF(@constraint_name IS NOT NULL, 'ALTER TABLE country_phone_prefix DROP PRIMARY KEY', 'SELECT 1');
+            PREPARE stmt FROM @sql;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
         SQL);
         $this->addSql(<<<'SQL'
-            ALTER TABLE country_phone_prefix ADD country_code VARCHAR(2) NOT NULL
+            SET @column_exists = (
+                SELECT COUNT(*)
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'country_phone_prefix'
+                AND COLUMN_NAME = 'country_code'
+            );
+            SET @sql = IF(@column_exists = 0, 'ALTER TABLE country_phone_prefix ADD COLUMN country_code VARCHAR(2) NOT NULL', 'SELECT 1');
+            PREPARE stmt FROM @sql;
+            EXECUTE stmt;
+            DEALLOCATE PREPARE stmt;
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE country_phone_prefix ADD PRIMARY KEY (country_code, phone_prefix)
