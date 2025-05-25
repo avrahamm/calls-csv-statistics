@@ -8,6 +8,7 @@ public/build/
 .github/
 .idea/
 .vscode/
+docs/
 docker-compose*.yml
 .env.local
 .env.*.local
@@ -15,6 +16,7 @@ docker-compose*.yml
 phpunit.xml
 tests/
 *.log
+*.md
 *.cache
 *.swp
 *.swo
