@@ -54,12 +54,12 @@ class ImportContinentPhonePrefixCommand extends Command
         }
 
         // Skip header row
-        fgetcsv($handle, 0, ",");
+        fgetcsv($handle, 0, ",", "\"", "\\");
 
         $batchCount = 0;
         $totalCount = 0;
 
-        while (($data = fgetcsv($handle, 0, ",")) !== false) {
+        while (($data = fgetcsv($handle, 0, ",", "\"", "\\")) !== false) {
             // CSV format: Country, Continent, Phone
             if (count($data) < 3) {
                 $io->warning(sprintf('Skipping invalid row: %s', implode(', ', $data)));
