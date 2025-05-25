@@ -1,54 +1,12 @@
 #!/bin/bash
 set -e
+# When starting from scratch, use setup-scaffolding.sh
 
 echo "Setting up Symfony and React application..."
-
-# Create Symfony project if it doesn't exist
-if [ ! -f "composer.json" ]; then
-    echo "Creating new Symfony project..."
-    # Check if directory is empty (excluding hidden files)
-    if [ -z "$(ls -A | grep -v '^\.')" ]; then
-        echo "Directory is empty, creating Symfony project using Symfony CLI..."
-        # Use Symfony CLI to create a new project (without Git initialization)
-        symfony new . --webapp --version=lts --no-git
-        # Install webpack encore bundle
-        composer require symfony/webpack-encore-bundle
-        composer install --optimize-autoloader --no-interaction --prefer-dist
-        bin/console cache:clear
-        bin/console cache:clear
-        php bin/console doctrine:migrations:migrate --no-interaction
-        php bin/console app:import-continent-phone-prefix public/sample-data/phone-codes.csv
-    else
-        echo "Directory is not empty, creating Symfony project using Symfony CLI..."
-        # Create a temporary directory
-        mkdir -p /tmp/symfony-project
-        cd /tmp/symfony-project
-        # Use Symfony CLI to create a new project in the temporary directory (without Git initialization)
-        symfony new . --webapp --version=lts --no-git
-        # Install webpack encore bundle
-        composer require symfony/webpack-encore-bundle
-        composer install --optimize-autoloader --no-interaction --prefer-dist
-        bin/console cache:clear
-        bin/console cache:clear
-        php bin/console doctrine:migrations:migrate --no-interaction
-        php bin/console app:import-continent-phone-prefix public/sample-data/phone-codes.csv
-
-        # Copy the files to the current directory
-        cp -r * /app/
-        cp -r .env /app/
-        cp -r .env.local /app/ 2>/dev/null || true
-        cp -r .env.test /app/ 2>/dev/null || true
-
-        # Go back to the original directory
-        cd /app
-    fi
-else
-    echo "Symfony project already exists, updating dependencies..."
-    composer install --optimize-autoloader --no-interaction --prefer-dist
-    bin/console cache:clear
-    php bin/console doctrine:migrations:migrate --no-interaction
-    php bin/console app:import-continent-phone-prefix public/sample-data/phone-codes.csv
-fi
+composer install --optimize-autoloader --no-interaction --prefer-dist
+bin/console cache:clear
+php bin/console doctrine:migrations:migrate --no-interaction
+php bin/console app:import-continent-phone-prefix public/sample-data/phone-codes.csv
 
 echo "Creating upload directories..."
 # Extract paths from .env file
