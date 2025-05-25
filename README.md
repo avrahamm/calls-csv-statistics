@@ -2,20 +2,6 @@
 
 This repository contains a Docker setup for developing a Symfony application with a React single-page application (SPA).
 
-## Steps to build a project.
-
-
-- git clone https://github.com/avrahamm/calls-csv-statistics.git
-
-- cd calls-csv-statistics/
-- cp .env.example .env
-- # edit IP_GEOLOCATION_API_KEY and other env variables if needed. 
-- Automatic setup script for Symfony and React
-- Live code syncing between host and containers for immediate development
-
-
-
-
 ## Features
 
 - PHP 8.1 with all extensions required for Symfony
@@ -30,7 +16,22 @@ This repository contains a Docker setup for developing a Symfony application wit
 - Docker
 - Docker Compose
 
-## Getting Started
+## Getting Started In short:
+```bash
+git clone https://github.com/avrahamm/calls-csv-statistics.git calls2
+cd calls2/
+cp .env.example .env
+# edit IP_GEOLOCATION_API_KEY
+# Now you can run
+docker compose -f docker-compose.yml up --build
+# You should be able to open an app http://localhost:18080/app
+# And browse by menu upload and statistics pages.
+# Cleanup
+docker compose down -v --remove-orphans
+docker rmi calls2-worker:latest calls2-php:latest
+```
+
+## Getting Started in details:
 
 ### 1. Clone the Repository
 
@@ -43,40 +44,59 @@ cd <repository-directory>
 
 For first-time setup or after modifying the Dockerfile:
 ```bash
-docker compose build
-docker compose up -d
+docker compose -f docker-compose.yml build
+docker compose -f docker-compose.yml up -d
 ```
 
 Or, for a single command that builds (if needed) and starts the containers:
 ```bash
-docker compose up -d --build
+docker compose -f docker-compose.yml up -d --build
 ```
 
-For subsequent starts when no Dockerfile changes have been made:
+For the later starts when no Dockerfile changes have been made:
 ```bash
-docker compose up -d
+docker compose -f docker-compose.yml up -d
 ```
 
 This will start all the necessary services:
 - PHP (Symfony)
+- Worker (Message Queue Consumer)
 - MySQL
 - Nginx
 - Node.js
 
 ### 3. Run the Setup Script
 
+For a new installation after cloning the repository:
+
 ```bash
 ./setup.sh
 ```
 
 This script will:
+- Install Composer dependencies
+- Clear Symfony cache
+- Run database migrations
+- Import continent phone prefixes from sample data
+- Create upload directories for call data processing
+- Build the assets
+
+If you're starting from scratch and need to scaffold a new project:
+
+```bash
+./setup-scaffolding.sh
+```
+
+This script will:
 - Create a new Symfony project (if it doesn't exist)
+- Install Symfony Webpack Encore bundle
 - Set up React in the Symfony assets directory
 - Create a basic React application structure
 - Configure Webpack Encore for React
 - Create a Symfony controller for the SPA
 - Run database migrations
 - Import continent phone prefixes from sample data
+- Create upload directories for call data processing
 - Build the assets
 
 ### 4. Access the Application
@@ -95,17 +115,19 @@ The MySQL database is accessible with the following credentials:
 
 Inside the Docker network, the database host is `database` instead of `localhost`.
 
-## Development Workflow
+## Development Workflow/ Code Syncing
 
-### Code Syncing
-
-This Docker setup uses volume mappings to ensure that any changes you make to the source code on your host machine are immediately synced to the containers. This means:
+This Docker development/not production setup uses volume mappings to ensure 
+that any changes you make to the source code on your host machine 
+are immediately synced to the containers. This means:
 
 - You can edit code in your favorite IDE/editor on your host machine
-- Changes are instantly available in the containers without requiring rebuilds or restarts
-- This applies to all source code files (PHP, JavaScript, CSS, Twig templates, etc.)
+- Changes are instantly available in the containers without 
+- requiring rebuilds or restarts
+- This applies to all source code files 
+- (PHP, JavaScript, CSS, Twig templates, etc.)
 
-The volume mappings are defined in the `docker-compose.yml` file (or `compose.yaml` in newer versions), where the project root directory is mounted to `/app` in each container.
+The volume mappings are defined in the `docker-compose.yml` 
 
 #### Excluded Directories
 
@@ -119,7 +141,8 @@ These directories use named volumes in Docker, which means:
 - They don't consume space on your host machine
 - They don't slow down your development environment with unnecessary file syncing
 
-Additionally, the following files and directories are excluded from the Docker build context via `.dockerignore`:
+Additionally, the following files and directories are excluded 
+from the Docker build context via `.dockerignore`:
 
 - Symfony cache, logs, and sessions: `var/cache/`, `var/log/`, `var/sessions/`
 - Webpack build output: `public/build/`
@@ -128,12 +151,16 @@ Additionally, the following files and directories are excluded from the Docker b
 - Environment and configuration files: `.env.local`, `.env.*.local`
 - Testing files: `.phpunit.result.cache`, `phpunit.xml`, `tests/`
 - Temporary and system files: `*.log`, `*.cache`, `*.swp`, `*.swo`, `.DS_Store`
-
-This ensures that only the necessary files are included in the Docker build context, resulting in faster builds and smaller images.
+- doc folder and .md files.
+This ensures that only the necessary files are included
+- in the Docker build context, resulting in faster builds
+- and smaller images.
 
 ### Symfony Development
 
-The Symfony application code is located in the project root. Any changes to the PHP files will be immediately available in the container and reflected in the browser after a page refresh.
+The Symfony application code is located in the project root.
+Any changes to the PHP files will be immediately available
+in the container and reflected in the browser after a page refresh.
 
 ### React Development
 
@@ -148,11 +175,15 @@ For automatic rebuilding during development (recommended):
 docker compose exec node bash -c "cd /app && yarn encore dev --watch"
 ```
 
-This will watch for changes in your React files and automatically rebuild the assets whenever a file is modified.
+This will watch for changes in your React files 
+and automatically rebuild the assets whenever a file is modified.
 
 ### Git Versioning
 
-This project is designed to use Git for version control on the host machine, not inside the Docker containers. The `.git` directory is already excluded from the Docker build context via `.dockerignore`, which ensures:
+This project is designed to use Git for version control
+on the host machine, not inside the Docker containers.
+The `.git` directory is already excluded from the Docker build context
+via `.dockerignore`, which ensures:
 
 - Faster builds and smaller Docker images
 - No Git-related operations inside the containers
@@ -204,13 +235,59 @@ All Git operations should be performed on the host machine, not inside the Docke
 
 ## Customizing the Setup
 
+### Environment Variables
+
+The application uses several environment variables that can be configured in the `.env` file:
+
+#### Docker Container Configuration
+- `PHP_CONTAINER_NAME`: Name for the PHP container (default: calls2-php-container)
+- `WORKER_CONTAINER_NAME`: Name for the worker container (default: calls2-worker-container)
+- `NGINX_CONTAINER_NAME`: Name for the Nginx container (default: calls2-nginx-container)
+- `DATABASE_CONTAINER_NAME`: Name for the database container (default: calls2-database-container)
+- `NODE_CONTAINER_NAME`: Name for the Node.js container (default: calls2-node-container)
+
+#### Port Mappings
+- `NGINX_PORT`: Port for accessing the web application (default: 18080)
+- `DATABASE_PORT`: Port for accessing the database from the host (default: 13306)
+- `PHP_PORT`: Port for PHP-FPM (default: 9000)
+
+#### Worker Settings
+- `WORKER_TIME_LIMIT`: Time limit for the worker process in seconds (default: 3600)
+- `WORKER_MEMORY_LIMIT`: Memory limit for the worker process (default: 128M)
+
+#### Database Settings
+- `MYSQL_ROOT_PASSWORD`: Root password for MySQL (default: root)
+- `MYSQL_DATABASE`: Database name (default: symfony)
+- `MYSQL_USER`: Database user (default: symfony)
+- `MYSQL_PASSWORD`: Database password (default: symfony)
+- `DOCKER_DATABASE_URL`: Database connection URL for Docker environment
+
+#### Upload Paths
+- `UPLOAD_PATH`: Directory for uploaded CSV files (default: public/calls-data)
+- `CHUNKS_PATH`: Directory for temporary chunk files (default: ${UPLOAD_PATH}/chunks)
+
+#### Enrichment Settings ans steps
+- `ENRICH_DEST_CONTINENT_OFFSET`: Offset for destination 
+- continent enrichment (default: 10)
+- `IP_GEOLOCATION_API_KEY`: API key for IP geolocation service
+- `ENRICH_SOURCE_CONTINENT_OFFSET`: Offset for source continent enrichment (default: 10)
+
+#### Enrichment steps
+- EnrichDestContinentMessageHandler serves batches (default: 10)
+    of unique source dialed numbers. 
+- EnrichSourceContinentMessageHandler serves batches (default: 10)
+    of source ip values with an API calls 
+    are made only for one ip at a time.
+    Batch look is possible for but needs a paid subscription.
+    two previous handlers are done.
+
 ### PHP Configuration
 
 PHP configuration can be modified in `docker/php/php.ini`.
 
 ### Nginx Configuration
 
-Nginx configuration can be modified in `docker/nginx/default.conf`.
+Nginx configuration can be modified in `docker/nginx/default.conf.template`.
 
 ### Docker Configuration
 
@@ -269,6 +346,16 @@ The system uses Symfony Messenger for asynchronous processing:
 - `FinalizeCallsImportMessage`: Dispatched after all chunks are queued for processing
 - Messages are processed by dedicated handlers that can run in parallel
 
+The worker service in the Docker setup is responsible for consuming these messages:
+```bash
+# From docker-compose.yml
+worker:
+  # ... other configuration ...
+  command: ["bin/console", "messenger:consume", "async", "--time-limit=${WORKER_TIME_LIMIT}", "--memory-limit=${WORKER_MEMORY_LIMIT}"]
+```
+
+You can configure the worker's time and memory limits using the `WORKER_TIME_LIMIT` and `WORKER_MEMORY_LIMIT` environment variables.
+
 #### Staging Table Approach
 
 The `calls_staging` table:
@@ -277,7 +364,7 @@ The `calls_staging` table:
   - `batch_id`: Unique identifier for the import operation
   - `chunk_filename`: Name of the chunk file
   - `row_number_in_chunk`: Position of the row in the chunk
-  - `is_valid`: Flag indicating if the row passed validation
+  - `is_valid`: The Flag indicating if the row passed validation
   - `error_message`: Details of any validation errors
 
 #### Error Handling and Validation
@@ -286,8 +373,10 @@ Each row undergoes validation:
 - Data type checking
 - Required field validation
 - Format validation (e.g., valid IP addresses)
-- Invalid rows are marked in the staging table but don't prevent processing of valid rows
-- If any invalid rows are found, the entire batch is rejected during finalization
+- Invalid rows are marked in the staging table 
+but don't prevent processing of valid rows
+- If any invalid rows are found, the entire batch is rejected 
+during finalization
 
 #### Finalization Process
 
@@ -308,10 +397,15 @@ php bin/console app:process-calls-csv-parallel path/to/file.csv
 
 ### Benefits
 
-- **Improved Performance**: Processing large files in parallel significantly reduces total processing time
-- **Scalability**: The system can scale to handle very large files by adjusting the chunk size
+- **Improved Performance**: By avoiding serial operations 
+- and performing operations in bulk or parallel manner as much as possible.
+- **Improved Performance**: Processing large files in 
+- parallel significantly reduces total processing time
+- **Scalability**: The system can scale to handle 
+- large files by adjusting the chunk size
 - **Reliability**: Transaction-based approach ensures data integrity
-- **Error Isolation**: Issues in one chunk don't affect processing of other chunks
+- **Input file error handling **: In case a corrupted chunk is detected,
+- the file is not processed.
 - **Detailed Error Reporting**: Precise tracking of which rows had issues and why
 
 ## License
